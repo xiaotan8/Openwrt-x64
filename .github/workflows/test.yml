@@ -10,17 +10,6 @@ jobs:
   build:
     runs-on:  ubuntu-18.04
     if: github.event.repository.owner.id == github.event.sender.id
-name: Ubuntu
-on:
-  watch:
-    types: started
-jobs:
-  Ubuntu:
-    runs-on: ubuntu-latest
-    steps:
-    - name: SSH connection to Actions
-      uses: P3TERX/debugger-action@master
-      
     name: Build ${{matrix.target}}
     strategy:
       fail-fast: false
