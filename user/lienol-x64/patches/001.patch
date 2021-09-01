@@ -1,5 +1,5 @@
---- 000.default	2021-09-02 00:41:07.066638485 +0800
-+++ 111.default	2021-09-02 00:01:29.205634000 +0800
+--- feeds.conf.default	2021-09-02 00:41:07.066638485 +0800
++++ feeds.conf.default	2021-09-02 00:01:29.205634000 +0800
 @@ -7,4 +7,6 @@
  src-git packages https://github.com/Lienol/openwrt-packages.git;main
  src-git luci https://github.com/Lienol/openwrt-luci.git;18.06-dev
