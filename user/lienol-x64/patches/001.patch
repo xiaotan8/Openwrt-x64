@@ -9,6 +9,7 @@
 -#src-git oldpackages http://git.openwrt.org/packages.git
 -#src-link custom /usr/src/openwrt/custom-feed
  src-git lienol https://github.com/Lienol/openwrt-package.git;main
+ \ No newline at end of file
 +src-git freifunk https://github.com/freifunk/openwrt-packages.git;master
 +src-git passwall https://github.com/xiaorouji/openwrt-passwall;main
- 
+\ No newline at end of file
