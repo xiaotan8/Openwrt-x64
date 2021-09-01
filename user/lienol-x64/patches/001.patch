@@ -1,5 +1,5 @@
---- feeds.conf.default	2021-09-02 00:41:07.066638485 +0800
-+++ feeds.conf.default	2021-09-02 01:55:59.850031379 +0800
+--- feeds.conf.default	2021-01-31 11:17:55.795923300 +0800
++++ feeds.conf.default	2021-01-31 11:18:00.859992600 +0800
 @@ -2,9 +2,7 @@
  src-git luci https://github.com/Lienol/openwrt-luci.git;18.06-dev
  src-git routing https://git.openwrt.org/feed/routing.git
