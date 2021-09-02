@@ -1,4 +1,0 @@
-9a10,12
-> src-git freifunk https://github.com/freifunk/openwrt-packages.git;master
-> src-git passwall https://github.com/xiaorouji/openwrt-passwall;main
-> 
