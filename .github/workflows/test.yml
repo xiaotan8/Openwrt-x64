@@ -52,7 +52,7 @@ jobs:
         
     - name: Clone source code
       run: |
-        git clone ${{ env.REPO_URL }} -b ${{ env.REPO_BRANCH }} openwrt
+        git clone -b ${{ env.REPO_BRANCH }} --single-branch ${{ env.REPO_URL }} openwrt
         
     - name: Apply Patches
       run: | 
