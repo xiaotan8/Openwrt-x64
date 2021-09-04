@@ -105,7 +105,7 @@ jobs:
         cd openwrt
         mv ../user/${{matrix.target}}/config.diff .config
         make defconfig
-        make download -j8
+        make -j8 download V=s
         find dl -size -1024c -exec ls -l {} \;
         find dl -size -1024c -exec rm -f {} \;
 
