@@ -1,6 +1,6 @@
 name: Openwrt-AutoBuild
 
-on: push
+#on: push
 
 
 env:
