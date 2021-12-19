@@ -1,5 +1,5 @@
 #!/bin/bash
 
 echo "Apply custom.sh"
-rm -rf package/luci-theme-argon
-git clone https://github.com/jerrykuku/luci-theme-argon.git                                       package/luci-theme-argon
+rm -rf luci/themes/luci-theme-argon
+git clone https://github.com/jerrykuku/luci-theme-argon.git                                       luci/themes/luci-theme-argon
