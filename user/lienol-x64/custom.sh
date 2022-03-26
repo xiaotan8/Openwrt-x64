@@ -8,3 +8,4 @@ git clone https://github.com/xiaorouji/openwrt-passwall.git -b packages      pac
 git clone https://github.com/xiaorouji/openwrt-passwall.git -b luci     package/diy/passwall
 git clone https://github.com/vernesong/OpenClash.git                package/diy/openclash
 git clone https://github.com/messense/aliyundrive-webdav.git        package/diy/aliyundrive-webdav
+git clone https://github.com/messense/aliyundrive-fuse.git          package/diy/aliyundrive-fuse
