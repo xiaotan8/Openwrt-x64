@@ -2,6 +2,7 @@
 
 echo "Test custom.sh"
 rm -rf feeds/packages/kernel/antfs
+rm -rf package/feeds/packages/antfs-mount
 svn co https://github.com/coolsnowwolf/lede/trunk/package/lean/ntfs3-mount feeds/packages/kernel/ntfs3-mount
 svn co https://github.com/coolsnowwolf/lede/trunk/package/lean/ntfs3-oot   feeds/packages/kernel/ntfs3-oot
 git clone https://github.com/jerrykuku/luci-app-jd-dailybonus.git   package/luci-app-jd-dailybonus
