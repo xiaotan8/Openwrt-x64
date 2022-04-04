@@ -1,4 +1,8 @@
 # Action-Openwrt
+
+默认IP地址 10.10.10.100
+
+
 ![](https://github.com/xiaotan8/Openwrt-lienol-x64/workflows/Openwrt-AutoBuild/badge.svg)
 ![](https://img.shields.io/github/downloads/xiaotan8/Openwrt-lienol-x64/total)
 ![](https://img.shields.io/github/v/release/xiaotan8/Openwrt-lienol-x64)
