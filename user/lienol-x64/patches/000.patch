@@ -1,5 +1,5 @@
---- /feeds.conf.default	2021-09-06 18:16:29.392573783 +0800
-+++ /feeds.conf.default	2021-09-08 21:30:10.826383368 +0800
+--- ./feeds.conf.default	2021-09-06 18:16:29.392573783 +0800
++++ ./feeds.conf.default	2021-09-08 21:30:10.826383368 +0800
 @@ -1,8 +1,13 @@
   src-git-full packages https://git.openwrt.org/feed/packages.git
   src-git-full luci https://git.openwrt.org/project/luci.git
