@@ -1,11 +1,11 @@
 --- /feeds.conf.default	2021-09-06 18:16:29.392573783 +0800
 +++ /feeds.conf.default	2021-09-08 21:30:10.826383368 +0800
 @@ -6,3 +6,8 @@ src-git-full telephony https://git.openwrt.org/feed/telephony.git
-#src-git-full targets https://github.com/openwrt/targets.git
-#src-git-full oldpackages http://git.openwrt.org/packages.git
-#src-link custom /usr/src/openwrt/custom-feed
-+src-git lienol https://github.com/Lienol/openwrt-package.git;main
-+src-git other https://github.com/Lienol/openwrt-package.git;other
-+src-git passwall https://github.com/xiaorouji/openwrt-passwall.git;packages
-+src-git passwall-luci https://github.com/xiaorouji/openwrt-passwall.git;luci
-+src-git infinityfreedom https://github.com/xiaoqingfengATGH/luci-theme-infinityfreedom.git
+ #src-git-full targets https://github.com/openwrt/targets.git
+ #src-git-full oldpackages http://git.openwrt.org/packages.git
+ #src-link custom /usr/src/openwrt/custom-feed
++ src-git lienol https://github.com/Lienol/openwrt-package.git;main
++ src-git other https://github.com/Lienol/openwrt-package.git;other
++ src-git passwall https://github.com/xiaorouji/openwrt-passwall.git;packages
++ src-git passwall-luci https://github.com/xiaorouji/openwrt-passwall.git;luci
++ src-git infinityfreedom https://github.com/xiaoqingfengATGH/luci-theme-infinityfreedom.git
