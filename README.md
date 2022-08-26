@@ -1,6 +1,6 @@
 # Action-Openwrt
 
-默认IP地址 10.10.10.100
+
 
 
 ![](https://github.com/xiaotan8/Openwrt-x64/workflows/Openwrt-AutoBuild/badge.svg)
