@@ -9,3 +9,5 @@ git clone https://github.com/destan19/OpenAppFilter.git           package/diy/Op
 git clone https://github.com/xiaorouji/openwrt-passwall.git -b packages      package/diy/passwall-packages
 git clone https://github.com/xiaorouji/openwrt-passwall.git -b luci     package/diy/passwall
 # git clone  https://github.com/fw876/helloworld.git                package/helloworld
+rm -rf ./target/linux/x86/config-5.15
+wget -p ./target/linux/x86/   https://raw.githubusercontent.com/coolsnowwolf/lede/master/target/linux/x86/config-5.15
