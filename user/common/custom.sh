@@ -5,7 +5,7 @@
 # 默认 DNS: 10.10.10.10
 
 # OpenWrt 工作目录（根据你的 workflow 或路径调整）
-BUILD_DIR="${BUILD_DIR:-openwrt}"
+BUILD_DIR="${BUILD_DIR:}"
 
 echo "=============================="
 echo "Apply custom.sh"
