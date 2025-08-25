@@ -86,13 +86,6 @@ jobs:
       run: |
         git clone ${{ env.REPO_URL }} -b ${{ env.REPO_BRANCH }} openwrt
 
-    - name: Fix Rust CI llvm config
-      run: |
-        echo "Fixing Rust config.toml..."
-        find openwrt/build_dir/ -type f -name "config.toml" | while read -r file; do
-          sed -i 's/download-ci-llvm = true/download-ci-llvm = "if-unchanged"/' "$file"
-        done
-
     - name: Apply Patches
       run: | 
         echo "Apply patches"
@@ -113,6 +106,14 @@ jobs:
       
     - name: Install feeds
       run: cd openwrt && ./scripts/feeds install -a
+
+    - name: Fix Rust CI llvm config
+      run: |
+        echo "Fixing Rust config.toml..."
+        find openwrt/build_dir/ -type f -name "config.toml" | while read -r file; do
+          sed -i 's/download-ci-llvm = true/download-ci-llvm = "if-unchanged"/' "$file"
+        done
+
 
     - name: Load custom configuration
       run: |        
