@@ -99,7 +99,23 @@ jobs:
           find "user/${{matrix.target}}/patches" -type f -name '*.patch' -print0 | sort -z | xargs -I % -t -0 -n 1 sh -c "cat '%'  | patch -d 'openwrt' -p0 --forward"
         )
         fi         
+      # 缓存 dl (源码下载目录)
+    - name: Cache dl
+      uses: actions/cache@v3
+      with:
+          path: openwrt/dl
+          key: ${{ runner.os }}-openwrt-dl
+          restore-keys: |
+            ${{ runner.os }}-openwrt-dl
 
+      # 缓存 ccache (编译缓存)
+    - name: Cache ccache
+      uses: actions/cache@v3
+      with:
+          path: ~/.ccache
+          key: ${{ runner.os }}-openwrt-ccache-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-openwrt-ccache-
     - name: Update feeds
       run: cd openwrt && ./scripts/feeds update -a
 
@@ -107,26 +123,7 @@ jobs:
     - name: Install feeds
       run: cd openwrt && ./scripts/feeds install -a
 
-    - name: Apply Rust CI patch
-      run: |
-          mkdir -p feeds/packages/lang/rust/patches
-          cat > feeds/packages/lang/rust/patches/010-fix-ci-llvm.patch <<'EOF'
---- a/src/bootstrap/src/core/config/config.rs
-+++ b/src/bootstrap/src/core/config/config.rs
-@@ -1637,7 +1637,11 @@
-         }
- 
-         if download_ci_llvm {
--            if build.is_ci {
--                panic!("`llvm.download-ci-llvm` cannot be set to `true` on CI. Use `if-unchanged` instead.");
--            }
-+            if build.is_ci {
-+                // OpenWrt buildbots always run in CI, force "if-unchanged" instead of failing
-+                println!("info: Forcing `llvm.download-ci-llvm = \"if-unchanged\"` on CI");
-+                self.llvm.download_ci_llvm = Some("if-unchanged".to_string());
-+            }
-         }
-EOF
+
 
 
 
@@ -174,7 +171,26 @@ EOF
     - name: Check space usage
       if: (!cancelled())
       run: df -hT
-      
+    - name: Apply Rust CI patch
+      run: |
+          mkdir -p openwrt/feeds/packages/lang/rust/patches
+          cat > openwrt/feeds/packages/lang/rust/patches/010-fix-ci-llvm.patch <<'EOF'
+--- a/src/bootstrap/src/core/config/config.rs
++++ b/src/bootstrap/src/core/config/config.rs
+@@ -1637,7 +1637,11 @@
+         }
+ 
+         if download_ci_llvm {
+-            if build.is_ci {
+-                panic!("`llvm.download-ci-llvm` cannot be set to `true` on CI. Use `if-unchanged` instead.");
+-            }
++            if build.is_ci {
++                // OpenWrt buildbots always run in CI, force "if-unchanged" instead of failing
++                println!("info: Forcing `llvm.download-ci-llvm = \"if-unchanged\"` on CI");
++                self.llvm.download_ci_llvm = Some("if-unchanged".to_string());
++            }
+         }
+EOF      
     - name: Compile the firmware
       id: compile
       run: |
