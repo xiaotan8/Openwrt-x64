@@ -173,8 +173,8 @@ jobs:
       run: df -hT
     - name: Apply Rust CI patch
       run: |
-          mkdir -p openwrt/feeds/packages/lang/rust/patches
-          cat <<'EOF' > openwrt/feeds/packages/lang/rust/patches/010-fix-ci-llvm.patch
+        mkdir -p openwrt/feeds/packages/lang/rust/patches
+        cat <<'EOF' > openwrt/feeds/packages/lang/rust/patches/010-fix-ci-llvm.patch
 --- a/src/bootstrap/src/core/config/config.rs
 +++ b/src/bootstrap/src/core/config/config.rs
 @@ -1637,7 +1637,11 @@
