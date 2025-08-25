@@ -1,6 +1,5 @@
 name: Openwrt-AutoBuild
 
-
 on:
   workflow_dispatch:
     inputs:
@@ -9,14 +8,9 @@ on:
         required: false
         default: 'ssh-actions'
 
-
-# 定时触发编译(1,2,5,6,8,10,12,15,16,18,20,22,25,26,28,30早3点)
+  # 定时触发编译(周六早上3点, UTC+8 = 17点)
   schedule:
     - cron: 0 17 * * 6
-
-# 点赞☆Star触发编译
-#  watch:
-#    types: [started]
 
 env:
   RUN_VALIDATION: true
@@ -26,7 +20,6 @@ env:
 jobs:
   build:
     runs-on: ubuntu-22.04
-#    if: github.event.repository.owner.id == github.event.sender.id
     if: github.repository_owner=='xiaotan8'
     name: Build ${{matrix.target}}
     strategy:
@@ -45,8 +38,6 @@ jobs:
         date=$(date +%Y%m%d)
         echo "DATE=$date" >> $GITHUB_ENV
 
-
-        
     - name: Maximize build space
       uses: easimon/maximize-build-space@master
       with:
@@ -54,16 +45,15 @@ jobs:
           swap-size-mb: 1024
           remove-dotnet: 'true'
           remove-android: 'true'
+
     - name: Checkout
       uses: actions/checkout@v4
-
 
     - name: Build
       run: |
           echo "Free space:"
           df -h        
 
-   
     - name: Initialization environment
       env:
         DEBIAN_FRONTEND: noninteractive
@@ -77,6 +67,7 @@ jobs:
         sudo -E apt-get -qq autoremove --purge
         sudo -E apt-get -qq clean
         sudo -E timedatectl set-timezone "Asia/Shanghai"
+
     - name: Load Settings.ini
       run: |    
         source "${GITHUB_WORKSPACE}/user/${{matrix.target}}/settings.ini"
@@ -95,7 +86,14 @@ jobs:
     - name: Clone source code
       run: |
         git clone ${{ env.REPO_URL }} -b ${{ env.REPO_BRANCH }} openwrt
-        
+
+    - name: Fix Rust CI llvm config
+      run: |
+        echo "Fixing Rust config.toml..."
+        find openwrt/build_dir/ -type f -name "config.toml" | while read -r file; do
+          sed -i 's/download-ci-llvm = true/download-ci-llvm = "if-unchanged"/' "$file"
+        done
+
     - name: Apply Patches
       run: | 
         echo "Apply patches"
@@ -109,8 +107,10 @@ jobs:
           find "user/${{matrix.target}}/patches" -type f -name '*.patch' -print0 | sort -z | xargs -I % -t -0 -n 1 sh -c "cat '%'  | patch -d 'openwrt' -p0 --forward"
         )
         fi         
+
     - name: Update feeds
       run: cd openwrt && ./scripts/feeds update -a
+
       
     - name: Install feeds
       run: cd openwrt && ./scripts/feeds install -a
