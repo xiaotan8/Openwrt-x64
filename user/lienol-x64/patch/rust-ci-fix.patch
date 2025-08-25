@@ -1,0 +1,7 @@
+--- a/feeds/packages/lang/rust/src/bootstrap/config.toml
++++ b/feeds/packages/lang/rust/src/bootstrap/config.toml
+@@ -15,7 +15,7 @@
+ # CI builds where we want to build the exact same code everywhere
+ [llvm]
+ download-ci-llvm = true
++download-ci-llvm = "if-unchanged"
