@@ -20,6 +20,8 @@ on:
 
 env:
   RUN_VALIDATION: true
+  RUST_BACKTRACE: full
+  CARGO_HOME: ${{ github.workspace }}/.cargo
 
 jobs:
   build:
@@ -53,7 +55,16 @@ jobs:
           remove-dotnet: 'true'
           remove-android: 'true'
     - name: Checkout
-      uses: actions/checkout@v4
+    - uses: actions/checkout@v4
+    - uses: actions/cache@v3
+        with:
+          path: |
+            ~/.cargo/registry
+            ~/.cargo/git
+            openwrt/dl/cargo
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+      - run: git apply rust-ci-fix.patch
+      - run: make -j$(nproc)
 
     - name: Build
       run: |
