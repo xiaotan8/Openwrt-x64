@@ -56,15 +56,7 @@ jobs:
           remove-android: 'true'
     - name: Checkout
     - uses: actions/checkout@v4
-    - uses: actions/cache@v3
-        with:
-          path: |
-            ~/.cargo/registry
-            ~/.cargo/git
-            openwrt/dl/cargo
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-      - run: git apply rust-ci-fix.patch
-      - run: make -j$(nproc)
+
 
     - name: Build
       run: |
