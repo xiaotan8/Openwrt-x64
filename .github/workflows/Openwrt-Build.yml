@@ -190,7 +190,8 @@ jobs:
 +                self.llvm.download_ci_llvm = Some("if-unchanged".to_string());
 +            }
          }
-EOF      
+EOF
+    
     - name: Compile the firmware
       id: compile
       run: |
