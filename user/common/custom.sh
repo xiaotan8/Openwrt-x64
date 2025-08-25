@@ -12,3 +12,4 @@ cat > openwrt/feeds/packages/lang/rust/patches/010-disable-ci-llvm.patch <<'EOF'
 -# download-ci-llvm = true
 +download-ci-llvm = "if-unchanged"
 EOF
+grep -R "download-ci-llvm" openwrt/feeds/packages/lang/rust
