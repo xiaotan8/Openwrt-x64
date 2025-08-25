@@ -107,12 +107,27 @@ jobs:
     - name: Install feeds
       run: cd openwrt && ./scripts/feeds install -a
 
-    - name: Fix Rust CI llvm config
+    - name: Apply Rust CI patch
       run: |
-        echo "Fixing Rust config.toml..."
-        find openwrt/build_dir/ -type f -name "config.toml" | while read -r file; do
-          sed -i 's/download-ci-llvm = true/download-ci-llvm = "if-unchanged"/' "$file"
-        done
+          mkdir -p feeds/packages/lang/rust/patches
+          cat > feeds/packages/lang/rust/patches/010-fix-ci-llvm.patch <<'EOF'
+--- a/src/bootstrap/src/core/config/config.rs
++++ b/src/bootstrap/src/core/config/config.rs
+@@ -1637,7 +1637,11 @@
+         }
+ 
+         if download_ci_llvm {
+-            if build.is_ci {
+-                panic!("`llvm.download-ci-llvm` cannot be set to `true` on CI. Use `if-unchanged` instead.");
+-            }
++            if build.is_ci {
++                // OpenWrt buildbots always run in CI, force "if-unchanged" instead of failing
++                println!("info: Forcing `llvm.download-ci-llvm = \"if-unchanged\"` on CI");
++                self.llvm.download_ci_llvm = Some("if-unchanged".to_string());
++            }
+         }
+EOF
+
 
 
     - name: Load custom configuration
