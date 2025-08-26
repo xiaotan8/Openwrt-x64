@@ -29,6 +29,63 @@ fix_rust_compile_error() {
     fi
 }
 
+# 删除无用的 patch
+remove_rust_patch() {
+    PATCH_FILE="feeds/packages/lang/rust/patches/010-disable-ci-llvm.patch"
+    echo "[Step 2] Removing unnecessary Rust patch"
+    [ -f "$PATCH_FILE" ] && rm -f "$PATCH_FILE" && echo "[OK] Patch 删除成功 ✅" || echo "[INFO] Patch 不存在"
+}
+
+# 修改 trojan-plus 源码
+fix_trojan_plus_source() {
+    if [ -d "$TROJAN_SRC" ]; then
+        echo "[Step 3] Applying trojan-plus source patch"
+
+        patch -p1 -d "$TROJAN_SRC" <<'EOF'
+--- a/src/core/service.cpp
++++ b/src/core/service.cpp
+@@ -547,7 +547,7 @@ void Service::udp_async_read() {
+             int ttl         = -1;
+ 
+             targetdst = recv_tproxy_udp_msg((int)udp_socket.native_handle(), udp_recv_endpoint,
+-              boost::asio::buffer_cast<char*>(udp_read_buf.prepare(config.get_udp_recv_buf())), read_length, ttl);
++              const_cast<char*>(static_cast<const char*>(udp_read_buf.prepare(config.get_udp_recv_buf()).data())), read_length, ttl);
+
+       length = read_length < 0 ? 0 : read_length;
+       udp_read_buf.commit(length);
+EOF
+
+        patch -p1 -d "$TROJAN_SRC" <<'EOF'
+--- a/src/core/utils.cpp
++++ b/src/core/utils.cpp
+@@ -59,8 +59,8 @@ size_t streambuf_append(
+-    auto* dest      = boost::asio::buffer_cast<uint8_t*>(target.prepare(n));
+-    const auto* src = boost::asio::buffer_cast<const uint8_t*>(append_buf.data()) + start;
++    auto* dest      = static_cast<uint8_t*>(target.prepare(n).data());
++    const auto* src = static_cast<const uint8_t*>(append_buf.data().data()) + start;
+EOF
+
+        patch -p1 -d "$TROJAN_SRC" <<'EOF'
+--- a/src/session/session.cpp
++++ b/src/session/session.cpp
+@@ -26,9 +26,11 @@
+ size_t Session::s_total_session_count = 0;
++
+ Session::Session(Service* _service, const Config& _config)
+     : service(_service),
+       udp_gc_timer(_service->get_io_context()),
++      udp_gc_timer_checker(0),
+       pipeline_com(_config),
+       is_udp_forward(false),
+       config(_config) {}
+EOF
+
+        echo "[OK] Trojan-plus source patch applied ✅"
+    else
+        echo "[WARN] Trojan-plus source not found: $TROJAN_SRC"
+    fi
+}
+
 # 修改默认网络配置
 fix_config_generate() {
     if [ -f "$CONFIG_GENERATE" ]; then
@@ -53,8 +110,10 @@ fix_config_generate() {
     fi
 }
 
-# 执行
+# 执行步骤
 fix_rust_compile_error
+remove_rust_patch
+fix_trojan_plus_source
 fix_config_generate
 
 echo "=============================="
