@@ -1,39 +1,27 @@
 #!/bin/bash
-# custom.sh - OpenWrt 自定义脚本
-# 1. 修复 Rust CI 编译问题
-# 2. 修改默认网络配置
-# 适用于直接在 openwrt 根目录下执行
+set -e
 
+# ==============================
+# OpenWrt Custom Script
+# ==============================
 echo "=============================="
 echo "Apply custom.sh"
-echo "OpenWrt dir: $(pwd)"
 echo "=============================="
 
-# ---------------------------
-# 1. Rust CI patch
-# ---------------------------
-echo "Applying Rust CI patch..."
-mkdir -p feeds/packages/lang/rust/patches
-cat > feeds/packages/lang/rust/patches/010-disable-ci-llvm.patch <<'EOF'
---- a/src/bootstrap/config.toml.example
-+++ b/src/bootstrap/config.toml.example
-@@ -146,7 +146,7 @@
--# download-ci-llvm = true
-+download-ci-llvm = "if-unchanged"
-EOF
+# 定义路径（不加 openwrt/ 前缀）
+RUST_MAKEFILE="feeds/packages/lang/rust/Makefile"
+CONFIG_GENERATE="package/base-files/files/bin/config_generate"
 
-# 确认 patch 已生成
-grep -R "download-ci-llvm" feeds/packages/lang/rust || echo "Rust patch applied."
-
-# ---------------------------
-# 2. Rust Makefile fix
-# ---------------------------
-if [ -f "feeds/packages/lang/rust/Makefile" ]; then
-    echo "Fixing Rust Makefile for CI..."
-    sed -i 's/download-ci-llvm=true/download-ci-llvm=false/g' "feeds/packages/lang/rust/Makefile"
-else
-    echo "Rust Makefile not found: feeds/packages/lang/rust/Makefile"
-fi
+# 修复 Rust 编译错误（禁用下载 ci-llvm）
+fix_rust_compile_error() {
+    if [ -f "$RUST_MAKEFILE" ]; then
+        echo "[INFO] Fixing Rust Makefile (disable download-ci-llvm)"
+        sed -i 's/download-ci-llvm=true/download-ci-llvm=false/g' "$RUST_MAKEFILE"
+        grep -R "download-ci-llvm" feeds/packages/lang/rust || true
+    else
+        echo "[WARN] Rust Makefile not found: $RUST_MAKEFILE"
+    fi
+}
 
 # ---------------------------
 # 3. 修改默认网络配置
@@ -56,5 +44,12 @@ else
 
     echo "网络配置修改完成."
 fi
+}
 
+# 执行
+fix_rust_compile_error
+fix_config_generate
+
+echo "=============================="
 echo "custom.sh done."
+echo "=============================="
