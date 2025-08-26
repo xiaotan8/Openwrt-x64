@@ -1,62 +1,45 @@
 #!/bin/bash
-set -e
+echo "Test custom.sh"
 
-# ==============================
-# OpenWrt Custom Script
-# ==============================
-echo "=============================="
-echo "Apply custom.sh"
-echo "=============================="
+# 删除原 feeds 里相关的包，避免冲突
+rm -rf feeds/packages/net/{xray-core,v2ray-geodata,sing-box,chinadns-ng,dns2socks,hysteria,ipt2socks,microsocks,naiveproxy,shadowsocks-libev,shadowsocks-rust,shadowsocksr-libev,simple-obfs,tcping,trojan-plus,tuic-client,v2ray-plugin,xray-plugin,geoview,shadow-tls}
 
-# 定义路径
-RUST_MAKEFILE="feeds/packages/lang/rust/Makefile"
-CONFIG_GENERATE="package/base-files/files/bin/config_generate"
+# 拉取 passwall 相关依赖
+git clone https://github.com/xiaorouji/openwrt-passwall-packages package/passwall-packages
 
-# 修复 Rust 编译错误（禁用下载 ci-llvm）
-fix_rust_compile_error() {
-    if [ -f "$RUST_MAKEFILE" ]; then
-        echo "[INFO] Fixing Rust Makefile (disable download-ci-llvm)"
-        sed -i 's/download-ci-llvm=true/download-ci-llvm=false/g' "$RUST_MAKEFILE"
+# 删除旧的 luci-app-passwall / passwall2 / nikki / OpenClash
+rm -rf feeds/luci/applications/luci-app-passwall
+rm -rf feeds/luci/applications/luci-app-passwall2
+rm -rf feeds/luci/applications/luci-app-nikki
+rm -rf feeds/luci/applications/luci-app-OpenClash
 
-        # 自动检测结果
-        if grep -q "download-ci-llvm=false" "$RUST_MAKEFILE"; then
-            echo "[OK] Rust Makefile 已成功修改 ✅"
-        else
-            echo "[FAIL] Rust Makefile 修改失败 ❌"
-        fi
-    else
-        echo "[WARN] Rust Makefile not found: $RUST_MAKEFILE"
-    fi
-}
+# 拉取 passwall luci
+git clone https://github.com/xiaorouji/openwrt-passwall package/passwall-luci
 
-# 修改默认网络配置
-fix_config_generate() {
-    if [ -f "$CONFIG_GENERATE" ]; then
-        echo "[INFO] Found config_generate: $CONFIG_GENERATE"
-        echo "[INFO] 修改默认 LAN 网络参数"
+# 拉取 OpenClash
+git clone --depth=1 https://github.com/vernesong/OpenClash.git -b master package/openclash
 
-        # 修改默认 IP 地址
-        sed -i 's/192\.168\.1\.1/10.10.10.10/g' "$CONFIG_GENERATE"
+# 替换主题 argon
+rm -rf feeds/luci/themes/luci-theme-argon
+git clone https://github.com/jerrykuku/luci-theme-argon.git feeds/luci/themes/luci-theme-argon
 
-        # 修改默认网关
-        sed -i 's/192\.168\.1\.1/10.10.10.1/g' "$CONFIG_GENERATE"
+# # smartdns（如需启用取消注释）
+# rm -rf feeds/packages/net/smartdns
+# git clone https://github.com/pymumu/openwrt-smartdns.git feeds/packages/net/smartdns/
+# rm -rf feeds/luci/applications/luci-app-smartdns
+# git clone https://github.com/pymumu/luci-app-smartdns.git package/applications/luci-app-smartdns
 
-        # 添加默认 DNS
-        sed -i '/ipaddr=10.10.10.10/a\        uci set network.lan.dns=10.10.10.10' "$CONFIG_GENERATE"
+# 拉取实用插件
+git clone https://github.com/tty228/luci-app-wechatpush.git     package/applications/luci-app-wechatpush
+#git clone https://github.com/rufengsuixing/luci-app-adguardhome.git         package/applications/luci-app-adguardhome
+#git clone https://github.com/destan19/OpenAppFilter.git                     package/applications/OpenAppFilter
+git clone https://github.com/KFERMercer/luci-app-tcpdump.git                 package/applications/luci-app-tcpdump
+git clone https://github.com/nikkinikki-org/OpenWrt-nikki.git                package/applications/OpenWrt-nikki
+git clone https://github.com/jerrykuku/luci-app-argon-config.git             package/applications/luci-app-argon-config
 
-        # 自动检测结果
-        echo "-------- 检查修改结果 --------"
-        grep -E "10\.10\.10\.10|10\.10\.10\.1" "$CONFIG_GENERATE" || echo "[FAIL] 未找到修改结果 ❌"
-        echo "-----------------------------"
-    else
-        echo "[WARN] config_generate not found: $CONFIG_GENERATE"
-    fi
-}
+# wrtbwmon 流量统计
+git clone https://github.com/brvphoenix/wrtbwmon.git package/wrtbwmon
 
-# 执行
-fix_rust_compile_error
-fix_config_generate
-
-echo "=============================="
-echo "custom.sh done."
-echo "=============================="
+# 更新并安装 feeds，保证能被 make menuconfig 找到
+./scripts/feeds update -a
+./scripts/feeds install -a
