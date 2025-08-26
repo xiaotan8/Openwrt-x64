@@ -21,3 +21,5 @@ git clone https://github.com/tty228/luci-app-wechatpush.git     package/applicat
 git clone https://github.com/KFERMercer/luci-app-tcpdump.git                 package/applications/luci-app-tcpdump
 git clone https://github.com/nikkinikki-org/OpenWrt-nikki.git                package/applications/OpenWrt-nikki
 git clone https://github.com/jerrykuku/luci-app-argon-config.git             package/applications/luci-app-argon-config
+git clone https://github.com/xiaotan8/luci-app-accesscontrol.git             package/applications/luci-app-accesscontrol
+git clone https://github.com/xiaotan8/luci-app-vlmcsd.git                    package/applications/luci-app-vlmcsd
