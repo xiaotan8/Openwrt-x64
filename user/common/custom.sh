@@ -1,58 +1,53 @@
-#!/bin/bash
-set -e
+#!/usr/bin/env bash
+set -euo pipefail
 
-# ==============================
-# OpenWrt Custom Script (run from openwrt root)
-# ==============================
-echo "=============================="
-echo "Apply custom.sh"
-echo "=============================="
+echo "========================================"
+echo "Run custom.sh (must be executed from openwrt root)"
+echo "========================================"
 
-# 路径定义（相对于 openwrt 根目录）
+# ---- paths (relative to openwrt root) ----
 RUST_MAKEFILE="feeds/packages/lang/rust/Makefile"
-CONFIG_GENERATE="package/base-files/files/bin/config_generate"
 RUST_PATCH_FILE="feeds/packages/lang/rust/patches/010-disable-ci-llvm.patch"
 TROJAN_PATCH_DIR="package/passwall-packages/trojan-plus/patches"
-TROJAN_PATCH_FILE="$TROJAN_PATCH_DIR/001-fix-asio-buffer.patch"
+TROJAN_NEW_PATCH="$TROJAN_PATCH_DIR/001-fix-asio-buffer.patch"
+TROJAN_OLD_PATCH="$TROJAN_PATCH_DIR/001-Fix-boost1.87-build.patch"
+CONFIG_GENERATE="package/base-files/files/bin/config_generate"
 
-# -----------------------------
-# Step 1: 修复 Rust 编译错误（禁用下载 ci-llvm）
-# -----------------------------
-fix_rust_compile_error() {
-    echo "[Step 1] Fixing Rust compile issue"
-    if [ -f "$RUST_MAKEFILE" ]; then
-        sed -i 's/download-ci-llvm=true/download-ci-llvm=false/g' "$RUST_MAKEFILE" || true
-        if grep -q "download-ci-llvm=false" "$RUST_MAKEFILE"; then
-            echo "[OK] Rust Makefile modified: download-ci-llvm=false"
-        else
-            echo "[WARN] Rust Makefile did not contain download-ci-llvm=true or modification failed"
-        fi
-    else
-        echo "[WARN] Rust Makefile not found: $RUST_MAKEFILE"
-    fi
-}
+# ---- Step 1: Fix Rust download-ci-llvm to avoid CI panic ----
+echo "[Step 1] Fix Rust 'download-ci-llvm' in $RUST_MAKEFILE (if present)"
+if [ -f "$RUST_MAKEFILE" ]; then
+  # replace several common variants to "if-unchanged"
+  sed -i.bak -e 's/download-ci-llvm[[:space:]]*=[[:space:]]*true/download-ci-llvm = "if-unchanged"/g' \
+             -e 's/download-ci-llvm=true/download-ci-llvm = "if-unchanged"/g' \
+             -e 's/download-ci-llvm=false/download-ci-llvm = "if-unchanged"/g' \
+             "$RUST_MAKEFILE" || true
+  if grep -q 'download-ci-llvm.*if-unchanged' "$RUST_MAKEFILE"; then
+    echo "[OK] Rust Makefile updated to use if-unchanged."
+  else
+    echo "[WARN] Could not confirm change in $RUST_MAKEFILE (it may not contain download-ci-llvm)."
+  fi
+else
+  echo "[INFO] $RUST_MAKEFILE not found, skipping Rust Makefile tweak."
+fi
 
-# -----------------------------
-# Step 2: 删除无用的 Rust patch（如果存在）
-# -----------------------------
-remove_rust_patch() {
-    echo "[Step 2] Remove old Rust patch if exists"
-    if [ -f "$RUST_PATCH_FILE" ]; then
-        rm -f "$RUST_PATCH_FILE"
-        echo "[OK] Removed $RUST_PATCH_FILE"
-    else
-        echo "[INFO] No Rust patch to remove ($RUST_PATCH_FILE)"
-    fi
-}
+# remove old rust patch file if it exists (optional)
+if [ -f "$RUST_PATCH_FILE" ]; then
+  echo "[INFO] Removing existing rust patch file: $RUST_PATCH_FILE"
+  rm -f "$RUST_PATCH_FILE"
+fi
 
-# -----------------------------
-# Step 3: 写入 trojan-plus 补丁文件
-# -----------------------------
-write_trojan_patch() {
-    echo "[Step 3] Writing trojan-plus patch to: $TROJAN_PATCH_FILE"
-    mkdir -p "$TROJAN_PATCH_DIR"
+# ---- Step 2: Write trojan-plus patch (overwrite) ----
+echo "[Step 2] Ensure trojan-plus patch directory exists: $TROJAN_PATCH_DIR"
+mkdir -p "$TROJAN_PATCH_DIR"
 
-    cat > "$TROJAN_PATCH_FILE" <<'PATCH'
+# remove old conflicting patch if present
+if [ -f "$TROJAN_OLD_PATCH" ]; then
+  echo "[INFO] Removing old conflicting patch: $TROJAN_OLD_PATCH"
+  rm -f "$TROJAN_OLD_PATCH"
+fi
+
+echo "[Step 2] Writing new trojan-plus patch to: $TROJAN_NEW_PATCH"
+cat > "$TROJAN_NEW_PATCH" <<'PATCH'
 diff --git a/src/core/service.cpp b/src/core/service.cpp
 index 8ab2623..ca57dda 100644
 --- a/src/core/service.cpp
@@ -75,8 +70,8 @@ index 8ab2623..ca57dda 100644
              udp_read_buf.commit(length);
 PATCH
 
-    # append second file changes
-    cat >> "$TROJAN_PATCH_FILE" <<'PATCH'
+# append second hunk
+cat >> "$TROJAN_NEW_PATCH" <<'PATCH'
 diff --git a/src/core/utils.cpp b/src/core/utils.cpp
 index 7977fba..f2beb8a 100644
 --- a/src/core/utils.cpp
@@ -111,8 +106,8 @@ index 7977fba..f2beb8a 100644
  }
 PATCH
 
-    # append third file changes
-    cat >> "$TROJAN_PATCH_FILE" <<'PATCH'
+# append third hunk
+cat >> "$TROJAN_NEW_PATCH" <<'PATCH'
 diff --git a/src/session/session.cpp b/src/session/session.cpp
 index 4367ca5..23524b5 100644
 --- a/src/session/session.cpp
@@ -194,37 +189,26 @@ index 4367ca5..23524b5 100644
  }
 PATCH
 
-    echo "[OK] Wrote trojan-plus patch: $TROJAN_PATCH_FILE"
-    echo "[INFO] Patch file size: $(wc -c < "$TROJAN_PATCH_FILE") bytes"
-}
+# ensure correct perms and newline at EOF
+chmod 644 "$TROJAN_NEW_PATCH"
+# show info
+echo "[OK] wrote $TROJAN_NEW_PATCH ($(wc -c < "$TROJAN_NEW_PATCH") bytes)"
+echo "[INFO] first 40 lines of patch:"
+sed -n '1,40p' "$TROJAN_NEW_PATCH"
 
-# -----------------------------
-# Step 4: 修改默认网络配置
-# -----------------------------
-fix_config_generate() {
-    echo "[Step 4] Modify default network config (if exists)"
-    if [ -f "$CONFIG_GENERATE" ]; then
-        sed -i 's/192\.168\.1\.1/10.10.10.10/g' "$CONFIG_GENERATE"
-        # 如果要分别改 ipaddr 与 gateway，请更精确匹配，这里为简单替换
-        sed -i 's/192\.168\.1\.1/10.10.10.1/g' "$CONFIG_GENERATE"
-        sed -i '/ipaddr=10.10.10.10/a\        uci set network.lan.dns=10.10.10.10' "$CONFIG_GENERATE"
+# ---- Step 3: Modify default network config (if exists) ----
+echo "[Step 3] Modify default network config (if exists)"
+if [ -f "$CONFIG_GENERATE" ]; then
+  sed -i.bak -e 's/192\.168\.1\.1/10.10.10.10/g' "$CONFIG_GENERATE"
+  # if you want ipaddr different from gateway adjust more precise rules; this simple replace replaces both occurrences
+  sed -i -e 's/10\.10\.10\.10/10.10.10.10/g' "$CONFIG_GENERATE" || true
+  sed -i -e 's/192\.168\.1\.1/10.10.10.1/g' "$CONFIG_GENERATE" || true
+  sed -n '1,40p' "$CONFIG_GENERATE" | sed -n '1,20p'
+  echo "[OK] network config modified (backup saved to ${CONFIG_GENERATE}.bak)"
+else
+  echo "[INFO] $CONFIG_GENERATE not found, skipping network modification"
+fi
 
-        echo "-------- 检查修改结果（部分展示） --------"
-        grep -E "10\.10\.10\.10|10\.10\.10\.1" "$CONFIG_GENERATE" || echo "[WARN] 未找到修改结果"
-        echo "------------------------------------------"
-    else
-        echo "[WARN] config_generate not found: $CONFIG_GENERATE"
-    fi
-}
-
-# -----------------------------
-# Execute steps
-# -----------------------------
-fix_rust_compile_error
-remove_rust_patch
-write_trojan_patch
-fix_config_generate
-
-echo "=============================="
-echo "custom.sh done."
-echo "=============================="
+echo "========================================"
+echo "custom.sh finished"
+echo "========================================"
