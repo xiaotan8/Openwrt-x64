@@ -47,8 +47,8 @@ git clone --depth=1 https://github.com/nikkinikki-org/OpenWrt-nikki.git package/
 
 git clone --depth=1 https://github.com/xiaotan8/luci-app-vlmcsd.git package/applications/luci-app-vlmcsd
 git clone --depth=1 https://github.com/xiaotan8/luci-app-accesscontrol.git package/applications/luci-app-accesscontrol
-git clone --depth=1 https://github.com/cokebar/openwrt-vlmcsd package/vlmcsd
-git clone --depth=1 https://github.com/brvphoenix/wrtbwmon package/wrtbwmon
+git clone --depth=1 https://github.com/AutoCONFIG/vlmcsd.git package/vlmcsd
+git clone --depth=1 https://github.com/brvphoenix/wrtbwmon.git package/wrtbwmon
 
 # ==============================
 # 7. 覆盖 trojan-plus Makefile
