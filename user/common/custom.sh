@@ -47,6 +47,8 @@ git clone --depth=1 https://github.com/nikkinikki-org/OpenWrt-nikki.git package/
 
 git clone --depth=1 https://github.com/xiaotan8/luci-app-vlmcsd.git package/applications/luci-app-vlmcsd
 git clone --depth=1 https://github.com/xiaotan8/luci-app-accesscontrol.git package/applications/luci-app-accesscontrol
+git clone --depth=1 https://github.com/cokebar/openwrt-vlmcsd package/vlmcsd
+git clone --depth=1 https://github.com/brvphoenix/wrtbwmon package/wrtbwmon
 
 # ==============================
 # 7. 覆盖 trojan-plus Makefile
@@ -117,15 +119,6 @@ EOF
 # ==============================
 echo "[Step] 克隆额外插件"
 
-# vlmcsd (给 luci-app-vlmcsd 用)
-if [ ! -d "package/vlmcsd" ]; then
-    git clone --depth=1 https://github.com/cokebar/openwrt-vlmcsd package/vlmcsd
-fi
-
-# wrtbwmon (给 luci-app-wechatpush 用)
-if [ ! -d "package/wrtbwmon" ]; then
-    git clone --depth=1 https://github.com/brvphoenix/wrtbwmon package/wrtbwmon
-fi
 
 # ==============================
 # 9. 修复 boost-system 已删除的问题
