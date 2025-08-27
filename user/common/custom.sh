@@ -125,9 +125,20 @@ echo "[Step] 克隆额外插件"
 # ==============================
 fix_boost_dependency() {
     echo "[Step] 修复 boost-system 依赖问题"
-    for mk in $(grep -rl "boost-system" package/feeds || true); do
-        echo "  -> 修复 $mk"
-        sed -i 's/+boost-system/+boost/g' "$mk"
+
+    TARGET_MAKEFILES=(
+        "package/feeds/packages/domoticz/Makefile"
+        "package/feeds/packages/i2pd/Makefile"
+        "package/feeds/packages/kea/Makefile"
+        "package/feeds/packages/libtorrent-rasterbar/Makefile"
+    )
+
+    for mk in "${TARGET_MAKEFILES[@]}"; do
+        if [ -f "$mk" ]; then
+            echo "  -> 修复 $mk"
+            # 替换 +boost-system，无论前后是否有空格
+            sed -i 's/\+boost-system/+boost/g' "$mk"
+        fi
     done
 }
 fix_boost_dependency
