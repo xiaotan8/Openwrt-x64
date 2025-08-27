@@ -10,16 +10,16 @@ echo ">>> Running custom.sh ..."
 # ==============================
 # 1. 清理 feeds 里自带的包
 # ==============================
-# rm -rf feeds/packages/net/{xray-core,v2ray-geodata,sing-box,chinadns-ng,dns2socks,hysteria,ipt2socks,microsocks,naiveproxy,shadowsocks-libev,shadowsocks-rust,shadowsocksr-libev,simple-obfs,tcping,trojan-plus,tuic-client,v2ray-plugin,xray-plugin,geoview,shadow-tls}
-# rm -rf feeds/luci/applications/{luci-app-passwall,luci-app-passwall2,luci-app-nikki,luci-app-OpenClash}
+rm -rf feeds/packages/net/{xray-core,v2ray-geodata,sing-box,chinadns-ng,dns2socks,hysteria,ipt2socks,microsocks,naiveproxy,shadowsocks-libev,shadowsocks-rust,shadowsocksr-libev,simple-obfs,tcping,trojan-plus,tuic-client,v2ray-plugin,xray-plugin,geoview,shadow-tls}
+rm -rf feeds/luci/applications/{luci-app-passwall,luci-app-passwall2,luci-app-nikki,luci-app-OpenClash}
 rm -rf feeds/luci/themes/luci-theme-argon
 
 # ==============================
 # 2. 拉取 passwall / passwall2
 # ==============================
-# git clone --depth=1 https://github.com/xiaorouji/openwrt-passwall-packages package/passwall-packages
-# git clone --depth=1 https://github.com/xiaorouji/openwrt-passwall package/passwall-luci
-
+git clone --depth=1 https://github.com/xiaorouji/openwrt-passwall-packages package/passwall-packages
+git clone --depth=1 https://github.com/xiaorouji/openwrt-passwall package/passwall-luci
+rm -rf feeds/packages/net/trojan-plus
 # ==============================
 # 3. OpenClash
 # ==============================
