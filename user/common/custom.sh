@@ -47,8 +47,8 @@ git clone --depth=1 https://github.com/nikkinikki-org/OpenWrt-momo.git  package/
 
 git clone --depth=1 https://github.com/xiaotan8/luci-app-vlmcsd.git package/applications/luci-app-vlmcsd
 git clone --depth=1 https://github.com/xiaotan8/luci-app-accesscontrol.git package/applications/luci-app-accesscontrol
-git clone --depth=1 https://github.com/AutoCONFIG/vlmcsd.git package/vlmcsd
-git clone --depth=1 https://github.com/brvphoenix/wrtbwmon.git package/wrtbwmon
+git clone --depth=1 https://github.com/xiaotan8/vlmcsd.git package/vlmcsd
+git clone --depth=1 https://github.com/xiaotan8/wrtbwmon.git package/wrtbwmon
 
 
 # ==============================
