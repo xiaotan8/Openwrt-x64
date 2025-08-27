@@ -74,8 +74,8 @@ fix_boost_dependency() {
 }
 fix_boost_dependency
 
-# 修复 sstp-client 与 ppp 冲突：去掉重复安装 chap-secrets
-sed -i '/chap-secrets/d' package/feeds/packages/sstp-client/Makefile
+echo ">>> 修复 sstp-client 与 ppp 冲突..."
+sed -i '/chap-secrets/d' package/feeds/packages/sstp-client/Makefile || true
 
 
 # ==============================
