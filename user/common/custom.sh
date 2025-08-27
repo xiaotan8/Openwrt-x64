@@ -10,15 +10,15 @@ echo ">>> Running custom.sh ..."
 # ==============================
 # 1. 清理 feeds 里自带的包
 # ==============================
-rm -rf feeds/packages/net/{xray-core,v2ray-geodata,sing-box,chinadns-ng,dns2socks,hysteria,ipt2socks,microsocks,naiveproxy,shadowsocks-libev,shadowsocks-rust,shadowsocksr-libev,simple-obfs,tcping,trojan-plus,tuic-client,v2ray-plugin,xray-plugin,geoview,shadow-tls}
-rm -rf feeds/luci/applications/{luci-app-passwall,luci-app-passwall2,luci-app-nikki,luci-app-OpenClash}
+# rm -rf feeds/packages/net/{xray-core,v2ray-geodata,sing-box,chinadns-ng,dns2socks,hysteria,ipt2socks,microsocks,naiveproxy,shadowsocks-libev,shadowsocks-rust,shadowsocksr-libev,simple-obfs,tcping,trojan-plus,tuic-client,v2ray-plugin,xray-plugin,geoview,shadow-tls}
+# rm -rf feeds/luci/applications/{luci-app-passwall,luci-app-passwall2,luci-app-nikki,luci-app-OpenClash}
 rm -rf feeds/luci/themes/luci-theme-argon
 
 # ==============================
 # 2. 拉取 passwall / passwall2
 # ==============================
-git clone --depth=1 https://github.com/xiaorouji/openwrt-passwall-packages package/passwall-packages
-git clone --depth=1 https://github.com/xiaorouji/openwrt-passwall package/passwall-luci
+# git clone --depth=1 https://github.com/xiaorouji/openwrt-passwall-packages package/passwall-packages
+% git clone --depth=1 https://github.com/xiaorouji/openwrt-passwall package/passwall-luci
 
 # ==============================
 # 3. OpenClash
@@ -36,8 +36,8 @@ git clone --depth=1 https://github.com/jerrykuku/luci-app-argon-config.git packa
 # ==============================
 git clone --depth=1 https://github.com/tty228/luci-app-wechatpush.git package/applications/luci-app-wechatpush
 git clone --depth=1 https://github.com/KFERMercer/luci-app-tcpdump.git package/applications/luci-app-tcpdump
-git clone --depth=1 https://github.com/nikkinikki-org/OpenWrt-nikki.git package/applications/OpenWrt-nikki
-
+git clone --depth=1 https://github.com/nikkinikki-org/OpenWrt-nikki.git package/applications/luci-app-nikki
+git clone --depth=1 https://github.com/nikkinikki-org/OpenWrt-momo.git  package/applications/luci-app-momo
 # ==============================
 # 6. 可选插件
 # ==============================
@@ -53,8 +53,8 @@ git clone --depth=1 https://github.com/brvphoenix/wrtbwmon.git package/wrtbwmon
 # ==============================
 # 7. 覆盖 trojan-plus Makefile
 # ==============================
-mkdir -p package/passwall-packages/trojan-plus
-cat > package/passwall-packages/trojan-plus/Makefile << "EOF"
+# mkdir -p package/passwall-packages/trojan-plus
+# cat > package/passwall-packages/trojan-plus/Makefile << "EOF"
 include $(TOPDIR)/rules.mk
 
 PKG_NAME:=trojan-plus
