@@ -39,7 +39,7 @@ git clone https://github.com/jerrykuku/luci-app-argon-config.git             pac
 
 # wrtbwmon 流量统计
 git clone https://github.com/brvphoenix/wrtbwmon.git package/wrtbwmon
-
+rm -rf package/passwall-packages/trojan-plus
 # 更新并安装 feeds，保证能被 make menuconfig 找到
 ./scripts/feeds update -a
 ./scripts/feeds install -a
