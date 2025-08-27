@@ -23,7 +23,7 @@ rm -rf feeds/luci/themes/luci-theme-argon
 # ==============================
 # 3. OpenClash
 # ==============================
-git clone --depth=1 https://github.com/vernesong/OpenClash.git -b master package/openclash
+# git clone --depth=1 https://github.com/vernesong/OpenClash.git -b master package/openclash
 
 # ==============================
 # 4. Argon 主题 + 配置插件
