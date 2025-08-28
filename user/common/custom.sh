@@ -16,7 +16,8 @@ rm -rf feeds/luci/applications/{luci-app-passwall,luci-app-passwall2,luci-app-ni
 rm -rf feeds/luci/themes/luci-theme-argon
 rm -rf package/feeds/packages/sstp-client
 rm -rf package/feeds/packages/net/vpnc
-
+rm -rf feeds/packages/sstp-client
+rm -rf feeds/packages/net/vpnc
 # ==============================
 # 2. 拉取 passwall / passwall2
 # ==============================
