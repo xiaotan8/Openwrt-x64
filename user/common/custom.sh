@@ -76,6 +76,7 @@ fix_boost_dependency
 
 echo ">>> 修复 sstp-client 与 ppp 冲突..."
 sed -i '/chap-secrets/d' package/feeds/packages/sstp-client/Makefile || true
+sed -i 's/mkdir $(PKG_BUILD_DIR)\/bin/mkdir -p $(PKG_BUILD_DIR)\/bin/' feeds/packages/net/vpnc/Makefile
 
 
 # ==============================
