@@ -19,7 +19,7 @@ rm -rf feeds/luci/themes/luci-theme-argon
 # ==============================
 git clone --depth=1 https://github.com/xiaorouji/openwrt-passwall-packages package/passwall-packages
 git clone --depth=1 https://github.com/xiaorouji/openwrt-passwall package/passwall-luci
-rm -rf feeds/packages/net/trojan-plus
+rm -rf package/passwall-packages/trojan-plus
 # ==============================
 # 3. OpenClash
 # ==============================
