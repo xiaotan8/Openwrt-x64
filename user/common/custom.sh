@@ -14,7 +14,7 @@ rm -rf feeds/packages/net/{xray-core,v2ray-geodata,sing-box,chinadns-ng,dns2sock
 rm -rf feeds/luci/applications/{luci-app-passwall,luci-app-passwall2,luci-app-nikki,luci-app-OpenClash}
 rm -rf feeds/luci/themes/luci-theme-argon
 rm -rf package/feeds/packages/sstp-client
-rm -rf package/feeds/packages/vpnc
+rm -rf package/feeds/packages/net/vpnc
 
 
 # ==============================
