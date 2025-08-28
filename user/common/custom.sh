@@ -13,6 +13,9 @@ echo ">>> Running custom.sh ..."
 rm -rf feeds/packages/net/{xray-core,v2ray-geodata,sing-box,chinadns-ng,dns2socks,hysteria,ipt2socks,microsocks,naiveproxy,shadowsocks-libev,shadowsocks-rust,shadowsocksr-libev,simple-obfs,tcping,trojan-plus,tuic-client,v2ray-plugin,xray-plugin,geoview,shadow-tls}
 rm -rf feeds/luci/applications/{luci-app-passwall,luci-app-passwall2,luci-app-nikki,luci-app-OpenClash}
 rm -rf feeds/luci/themes/luci-theme-argon
+rm -rf package/feeds/packages/sstp-client
+rm -rf package/feeds/packages/vpnc
+
 
 # ==============================
 # 2. 拉取 passwall / passwall2
@@ -74,72 +77,13 @@ fix_boost_dependency() {
 }
 fix_boost_dependency
 
-# ==============================
-# 8. 修复 sstp-client 与 ppp 冲突
-# ==============================
-fix_sstp_conflict() {
-    echo "[Step] 修复 sstp-client 与 ppp 冲突..."
-    
-    # 方法1: 修改 sstp-client 的 Makefile，移除冲突文件
-    SSTP_MAKEFILE="feeds/packages/net/sstp-client/Makefile"
-    if [ -f "$SSTP_MAKEFILE" ]; then
-        echo "  -> 修改 sstp-client Makefile"
-        # 移除 chap-secrets 文件的安装
-        sed -i '/$(INSTALL_DIR) $(1)\/etc\/ppp\/ip-up.d/d' "$SSTP_MAKEFILE" || true
-        sed -i '/$(INSTALL_DIR) $(1)\/etc\/ppp\/ip-down.d/d' "$SSTP_MAKEFILE" || true
-        sed -i '/chap-secrets/d' "$SSTP_MAKEFILE" || true
-    fi
-    
-    # 方法2: 创建补丁文件来处理冲突
-    SSTP_PATCH_DIR="package/feeds/packages/sstp-client/patches"
-    mkdir -p "$SSTP_PATCH_DIR"
-    cat > "$SSTP_PATCH_DIR/100-remove-chap-secrets.patch" << 'EOF'
---- a/Makefile
-+++ b/Makefile
-@@ -50,8 +50,6 @@ define Package/sstp-client/install
- 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/sstpc $(1)/usr/sbin/sstpc
- 	$(INSTALL_DIR) $(1)/usr/lib/pppd/$(PKG_VERSION)
- 	$(INSTALL_BIN) $(PKG_BUILD_DIR)/libsstp-api.so $(1)/usr/lib/pppd/$(PKG_VERSION)/libsstp-api.so
--	$(INSTALL_DIR) $(1)/etc/ppp
--	$(INSTALL_CONF) ./files/chap-secrets $(1)/etc/ppp/chap-secrets
- endef
- 
- define Package/sstp-client/conffiles
-EOF
-}
-fix_sstp_conflict
 
-# ==============================
-# 9. 修复 vpnc 编译问题
-# ==============================
-fix_vpnc_issue() {
-    echo "[Step] 修复 vpnc 编译问题..."
-    VPNC_MAKEFILE="feeds/packages/net/vpnc/Makefile"
-    if [ -f "$VPNC_MAKEFILE" ]; then
-        echo "  -> 修复 vpnc Makefile"
-        sed -i 's/mkdir $(PKG_BUILD_DIR)\/bin/mkdir -p $(PKG_BUILD_DIR)\/bin/' "$VPNC_MAKEFILE"
-    fi
-}
-fix_vpnc_issue
-
-# ==============================
 # 10. 更新 feeds
 # ==============================
 ./scripts/feeds update -a
 ./scripts/feeds install -a
 
-# ==============================
-# 11. 最后再次检查 sstp-client 冲突
-# ==============================
-final_check() {
-    echo "[Step] 最终检查 sstp-client 配置..."
-    SSTP_MAKEFILE="feeds/packages/net/sstp-client/Makefile"
-    if [ -f "$SSTP_MAKEFILE" ]; then
-        if grep -q "chap-secrets" "$SSTP_MAKEFILE"; then
-            echo "  ⚠️  警告: sstp-client 仍然包含 chap-secrets，尝试再次修复"
-            sed -i '/chap-secrets/d' "$SSTP_MAKEFILE"
-        else
-            echo "  ✅ sstp-client 冲突已修复"
+
         fi
     fi
 }
