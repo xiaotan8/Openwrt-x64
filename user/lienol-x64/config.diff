@@ -1,60 +1,41 @@
-# ===============================
-# Target 平台：x86_64
-# ===============================
+# 固件架构
 CONFIG_TARGET_x86=y
 CONFIG_TARGET_x86_64=y
 CONFIG_TARGET_x86_64_DEVICE_generic=y
 
-# ===============================
-# LuCI 基础 & 主题
-# ===============================
+# LuCI + 中文界面
 CONFIG_PACKAGE_luci=y
-CONFIG_PACKAGE_luci-base=y
-CONFIG_PACKAGE_luci-compat=y
-CONFIG_PACKAGE_luci-mod-admin-full=y
+CONFIG_LUCI_LANG_zh_Hans=y
+CONFIG_PACKAGE_luci-i18n-base-zh-cn=y
+CONFIG_PACKAGE_luci-i18n-firewall-zh-cn=y
+CONFIG_PACKAGE_luci-i18n-opkg-zh-cn=y
+
+# 主题
 CONFIG_PACKAGE_luci-theme-argon=y
 CONFIG_PACKAGE_luci-app-argon-config=y
-CONFIG_PACKAGE_luci-i18n-base-zh-cn=y
-CONFIG_PACKAGE_luci-i18n-argon-config-zh-cn=y
 
-# ===============================
-# 代理 / VPN 插件
-# ===============================
+# 科学插件
 CONFIG_PACKAGE_luci-app-passwall=y
-CONFIG_PACKAGE_luci-i18n-passwall-zh-cn=y
-CONFIG_PACKAGE_luci-app-wireguard=y
-CONFIG_PACKAGE_luci-i18n-wireguard-zh-cn=y
+CONFIG_PACKAGE_luci-app-openclash=y
 
-# ===============================
-# 你 custom.sh 里拉的插件
-# ===============================
-CONFIG_PACKAGE_luci-app-wechatpush=y
-CONFIG_PACKAGE_luci-i18n-wechatpush-zh-cn=y
-CONFIG_PACKAGE_luci-app-tcpdump=y
-CONFIG_PACKAGE_luci-i18n-tcpdump-zh-cn=y
-CONFIG_PACKAGE_luci-app-nikki=y
-CONFIG_PACKAGE_luci-i18n-nikki-zh-cn=y
-CONFIG_PACKAGE_luci-app-momo=y
-CONFIG_PACKAGE_luci-i18n-momo-zh-cn=y
+# KMS 激活器
+CONFIG_PACKAGE_vlmcsd=y
 CONFIG_PACKAGE_luci-app-vlmcsd=y
-CONFIG_PACKAGE_luci-i18n-vlmcsd-zh-cn=y
-CONFIG_PACKAGE_luci-app-accesscontrol=y
-CONFIG_PACKAGE_luci-i18n-accesscontrol-zh-cn=y
 
-# wrtbwmon 是工具，不带 LuCI，跳过语言包
+# 带宽监控
 CONFIG_PACKAGE_wrtbwmon=y
+CONFIG_PACKAGE_luci-app-wrtbwmon=y
 
-# ===============================
-# 网络工具
-# ===============================
-CONFIG_PACKAGE_luci-app-nlbwmon=y
-CONFIG_PACKAGE_luci-i18n-nlbwmon-zh-cn=y
-CONFIG_PACKAGE_luci-app-bandwidthd=y
-CONFIG_PACKAGE_luci-i18n-bandwidthd-zh-cn=y
+# 工具类插件
+CONFIG_PACKAGE_luci-app-wechatpush=y
+CONFIG_PACKAGE_luci-app-tcpdump=y
+CONFIG_PACKAGE_luci-app-nikki=y
+CONFIG_PACKAGE_luci-app-momo=y
+CONFIG_PACKAGE_luci-app-accesscontrol=y
 
-# ===============================
-# 可选插件 (未启用，只保留 clone)
-# smartdns/adguardhome 手动启用时再加 i18n
-# ===============================
-# CONFIG_PACKAGE_luci-app-smartdns is not set
-# CONFIG_PACKAGE_luci-app-adguardhome is not set
+# 常用依赖
+CONFIG_PACKAGE_boost=y
+CONFIG_PACKAGE_boost-program_options=y
+CONFIG_PACKAGE_libpthread=y
+CONFIG_PACKAGE_libstdcpp=y
+CONFIG_PACKAGE_libopenssl=y
