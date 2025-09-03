@@ -76,35 +76,12 @@ set_default_language_zh_cn() {
 }
 
 # ==============================
-# 修复 sing-box 依赖缺失问题
-# ==============================
-fix_sing_box_deps() {
-    SING_BOX_MAKEFILE="package/passwall-packages/sing-box/Makefile"
-
-    if [ -f "$SING_BOX_MAKEFILE" ]; then
-        echo "[INFO] Found sing-box Makefile: $SING_BOX_MAKEFILE"
-
-        # 检查是否已经加过
-        if ! grep -q "sagernet/sing@v0.7.5" "$SING_BOX_MAKEFILE"; then
-            echo "[INFO] 修复 sing-box 依赖，强制使用 sagernet/sing@v0.7.5"
-            sed -i '/GO_PKG:=github.com\/sagernet\/sing-box/a\
-GO_MOD_ARGS += -replace=github.com/sagernet/sing=github.com/sagernet/sing@v0.7.5' "$SING_BOX_MAKEFILE"
-            echo "[OK] 已写入依赖修复 ✅"
-        else
-            echo "[SKIP] sing-box Makefile 已经包含依赖修复，跳过"
-        fi
-    else
-        echo "[WARN] sing-box Makefile not found: $SING_BOX_MAKEFILE"
-    fi
-}
-
-# ==============================
 # 执行
 # ==============================
 fix_rust_compile_error
 fix_config_generate
 set_default_language_zh_cn
-fix_sing_box_deps
+
 echo "=============================="
 echo "custom.sh done."
 echo "=============================="
