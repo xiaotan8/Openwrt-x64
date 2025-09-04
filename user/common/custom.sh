@@ -43,8 +43,8 @@ git clone --depth=1 https://github.com/nikkinikki-org/OpenWrt-momo.git  package/
 
 # 其它插件
 git clone --depth=1 https://github.com/xiaotan8/luci-app-vlmcsd.git package/applications/luci-app-vlmcsd
-git clone --depth=1 https://github.com/sirpdboy/luci-app-timecontrol package/applications/luci-app-timecontrol
-git clone --depth=1 https://github.com/sirpdboy/luci-app-eqosplus package/luci-app-eqosplus package/applications/luci-app-eqosplus
+git clone --depth=1 https://github.com/sirpdboy/luci-app-timecontrol.git package/applications/luci-app-timecontrol
+git clone --depth=1 https://github.com/sirpdboy/luci-app-eqosplus.git  package/applications/luci-app-eqosplus
 git clone --depth=1 https://github.com/xiaotan8/vlmcsd.git package/vlmcsd
 git clone --depth=1 https://github.com/xiaotan8/wrtbwmon.git package/wrtbwmon
 
