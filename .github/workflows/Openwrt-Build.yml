@@ -24,7 +24,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target: [OpenWrt 24.10,OpenWrt SNAPSHOT]
+        target: [OpenWrt24.10,OpenWrtSNAPSHOT]
 
     steps:
 
