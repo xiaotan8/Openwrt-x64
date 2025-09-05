@@ -24,7 +24,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        target: [lienol-x64]
+        target: [OpenWrt 24.10,OpenWrt SNAPSHOT]
 
     steps:
 

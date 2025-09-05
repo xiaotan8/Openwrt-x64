@@ -48,7 +48,7 @@ git clone --depth=1 https://github.com/sirpdboy/luci-app-partexp.git  package/ap
 git clone --depth=1 https://github.com/sirpdboy/luci-app-netspeedtest.git package/applications/luci-app-netspeedtest
 git clone --depth=1 https://github.com/xiaotan8/vlmcsd.git package/vlmcsd
 git clone --depth=1 https://github.com/xiaotan8/wrtbwmon.git package/wrtbwmon
-git clone --depth=1 https://github.com/chenmozhijin/turboacc.git  package/applications/luci-app-turboacc
+# git clone --depth=1 https://github.com/chenmozhijin/turboacc.git  package/applications/luci-app-turboacc
 # ==============================
 # 3. 修复 boost-system 已删除的问题
 # ==============================
