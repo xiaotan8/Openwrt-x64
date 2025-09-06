@@ -7,7 +7,6 @@ set -e
 echo "=============================="
 echo "Apply custom.sh"
 echo "=============================="
-git clone --depth=1 https://github.com/chenmozhijin/turboacc.git  package/applications/luci-app-turboacc
 
 # 定义路径
 RUST_MAKEFILE="feeds/packages/lang/rust/Makefile"
