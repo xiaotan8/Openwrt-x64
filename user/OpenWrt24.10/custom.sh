@@ -7,7 +7,8 @@ set -e
 echo "=============================="
 echo "Apply custom.sh"
 echo "=============================="
-
+rm -rf feeds/packages/lang/golang
+git clone https://github.com/sbwml/packages_lang_golang -b 25.x feeds/packages/lang/golang
 # 定义路径
 RUST_MAKEFILE="feeds/packages/lang/rust/Makefile"
 CONFIG_GENERATE="package/base-files/files/bin/config_generate"
