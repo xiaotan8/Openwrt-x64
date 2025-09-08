@@ -9,6 +9,10 @@ echo "Apply custom.sh"
 echo "=============================="
 rm -rf feeds/packages/lang/golang
 git clone https://github.com/sbwml/packages_lang_golang -b 25.x feeds/packages/lang/golang
+rm -rf feeds/packages/net/smartdns
+rm -rf feeds/luci/applications/luci-app-smartdns
+git clone https://github.com/pymumu/openwrt-smartdns.git                     feeds/packages/net/smartdns
+git clone https://github.com/pymumu/luci-app-smartdns.git                    package/applications/luci-app-smartdns
 # 定义路径
 RUST_MAKEFILE="feeds/packages/lang/rust/Makefile"
 CONFIG_GENERATE="package/base-files/files/bin/config_generate"
