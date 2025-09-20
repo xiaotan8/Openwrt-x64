@@ -100,8 +100,17 @@ fix_ssr_build() {
 }
 fix_ssr_build
 
+# ------------------------------
+# 5. 修复 Rust 构建（删除 .orig）
+# ------------------------------
+fix_rust_vendor() {
+    echo "[Step] 清理 Rust vendor 目录里的 .orig 文件"
+    find openwrt/build_dir/target-*/rustc-*/vendor -name "*.orig" -delete || true
+}
+fix_rust_vendor
+
 # ==============================
-# 5. 更新 feeds
+# 6. 更新 feeds
 # ==============================
 ./scripts/feeds update -a
 ./scripts/feeds install -a
