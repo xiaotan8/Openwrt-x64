@@ -31,6 +31,31 @@ fix_rust_compile_error() {
 }
 
 # ==============================
+# 清理 Rust vendor 中的 .orig 文件
+# ==============================
+fix_rust_orig_cleanup() {
+    if [ -f "$RUST_MAKEFILE" ]; then
+        echo "[INFO] 注入 Build/Prepare 钩子以清理 .orig 文件"
+
+        if ! grep -q "find \$(PKG_BUILD_DIR)/vendor -name '*.orig' -delete" "$RUST_MAKEFILE"; then
+            cat >> "$RUST_MAKEFILE" <<'EOF'
+
+define Build/Prepare
+	$$(call Build/Prepare/Default)
+	# 删除所有 patch 产生的 .orig 文件
+	find $$(PKG_BUILD_DIR)/vendor -name '*.orig' -delete
+endef
+EOF
+            echo "[OK] 已注入 Build/Prepare 清理逻辑 ✅"
+        else
+            echo "[INFO] Rust Makefile 已包含 .orig 清理逻辑，跳过"
+        fi
+    else
+        echo "[WARN] Rust Makefile not found: $RUST_MAKEFILE"
+    fi
+}
+
+# ==============================
 # 修改默认网络配置
 # ==============================
 fix_config_generate() {
@@ -57,11 +82,9 @@ fix_config_generate() {
 set_default_language_zh_cn() {
     echo "[INFO] 设置默认界面语言为简体中文"
 
-    # 确保 feeds 已经有中文语言包
     ./scripts/feeds update luci >/dev/null 2>&1
     ./scripts/feeds install -a >/dev/null 2>&1
 
-    # 在 config_generate 里加入语言设置
     if [ -f "$CONFIG_GENERATE" ]; then
         if ! grep -q "uci set luci.main.lang=zh_cn" "$CONFIG_GENERATE"; then
             echo "[INFO] 注入中文语言设置"
@@ -69,7 +92,6 @@ set_default_language_zh_cn() {
         fi
     fi
 
-    # 加入默认选中 luci-i18n-base-zh-cn
     if ! grep -q "CONFIG_PACKAGE_luci-i18n-base-zh-cn=y" .config 2>/dev/null; then
         echo "CONFIG_PACKAGE_luci-i18n-base-zh-cn=y" >> .config
     fi
@@ -79,6 +101,7 @@ set_default_language_zh_cn() {
 # 执行
 # ==============================
 fix_rust_compile_error
+fix_rust_orig_cleanup
 fix_config_generate
 set_default_language_zh_cn
 
