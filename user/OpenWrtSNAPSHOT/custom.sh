@@ -11,6 +11,7 @@ echo "=============================="
 # 定义路径
 RUST_MAKEFILE="feeds/packages/lang/rust/Makefile"
 CONFIG_GENERATE="package/base-files/files/bin/config_generate"
+RUST_VENDOR_DIR="build_dir/target-x86_64_musl/host/rustc-1.90.0-src/vendor"
 
 # ==============================
 # 修复 Rust 编译错误（禁用下载 ci-llvm）
@@ -31,27 +32,15 @@ fix_rust_compile_error() {
 }
 
 # ==============================
-# 清理 Rust vendor 中的 .orig 文件
+# 修复 Rust vendor (清理无效的 *.orig 文件)
 # ==============================
-fix_rust_orig_cleanup() {
-    if [ -f "$RUST_MAKEFILE" ]; then
-        echo "[INFO] 注入 Build/Prepare 钩子以清理 .orig 文件"
-
-        if ! grep -q "find \$(PKG_BUILD_DIR)/vendor -name '*.orig' -delete" "$RUST_MAKEFILE"; then
-            cat >> "$RUST_MAKEFILE" <<'EOF'
-
-define Build/Prepare
-	$$(call Build/Prepare/Default)
-	# 删除所有 patch 产生的 .orig 文件
-	find $$(PKG_BUILD_DIR)/vendor -name '*.orig' -delete
-endef
-EOF
-            echo "[OK] 已注入 Build/Prepare 清理逻辑 ✅"
-        else
-            echo "[INFO] Rust Makefile 已包含 .orig 清理逻辑，跳过"
-        fi
+fix_rust_vendor() {
+    if [ -d "$RUST_VENDOR_DIR" ]; then
+        echo "[INFO] 清理 Rust vendor 里的 *.orig 文件"
+        find "$RUST_VENDOR_DIR" -name "*.orig" -delete
+        echo "[OK] 已删除多余的 .orig 文件 ✅"
     else
-        echo "[WARN] Rust Makefile not found: $RUST_MAKEFILE"
+        echo "[WARN] Rust vendor not found: $RUST_VENDOR_DIR"
     fi
 }
 
@@ -101,7 +90,7 @@ set_default_language_zh_cn() {
 # 执行
 # ==============================
 fix_rust_compile_error
-fix_rust_orig_cleanup
+fix_rust_vendor
 fix_config_generate
 set_default_language_zh_cn
 
