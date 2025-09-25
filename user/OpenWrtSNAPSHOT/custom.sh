@@ -2,7 +2,7 @@
 set -e
 
 # ==============================
-# OpenWrt Custom Script
+# OpenWrt Custom Script (Final)
 # ==============================
 echo "=============================="
 echo "Apply custom.sh"
@@ -10,37 +10,50 @@ echo "=============================="
 
 # 定义路径
 RUST_MAKEFILE="feeds/packages/lang/rust/Makefile"
+PATCH_DIR="feeds/packages/lang/rust/patches"
+PATCH_FILE="$PATCH_DIR/0001-Update-xz2-and-use-it-static.patch"
 CONFIG_GENERATE="package/base-files/files/bin/config_generate"
-RUST_VENDOR_DIR="build_dir/target-x86_64_musl/host/rustc-1.90.0-src/vendor"
 
 # ==============================
 # 修复 Rust 编译错误（禁用下载 ci-llvm）
 # ==============================
 fix_rust_compile_error() {
     if [ -f "$RUST_MAKEFILE" ]; then
-        echo "[INFO] Fixing Rust Makefile (disable download-ci-llvm)"
+        echo "[INFO] 修复 Rust Makefile (禁用 ci-llvm)"
         sed -i 's/download-ci-llvm=true/download-ci-llvm=false/g' "$RUST_MAKEFILE"
 
         if grep -q "download-ci-llvm=false" "$RUST_MAKEFILE"; then
-            echo "[OK] Rust Makefile 已成功修改 ✅"
+            echo "[OK] Rust Makefile 修改成功 ✅"
         else
             echo "[FAIL] Rust Makefile 修改失败 ❌"
         fi
     else
-        echo "[WARN] Rust Makefile not found: $RUST_MAKEFILE"
+        echo "[WARN] Rust Makefile 未找到: $RUST_MAKEFILE"
     fi
 }
 
 # ==============================
-# 修复 Rust vendor (清理无效的 *.orig 文件)
+# 修复 Rust 补丁 (删除静态 xz2)
+# ==============================
+fix_rust_patch() {
+    if [ -f "$PATCH_FILE" ]; then
+        echo "[INFO] 删除有问题的 Rust 补丁: $PATCH_FILE"
+        rm -f "$PATCH_FILE"
+    else
+        echo "[OK] 未找到 $PATCH_FILE，无需处理"
+    fi
+}
+
+# ==============================
+# 修复 Rust vendor 目录
 # ==============================
 fix_rust_vendor() {
-    if [ -d "$RUST_VENDOR_DIR" ]; then
-        echo "[INFO] 清理 Rust vendor 里的 *.orig 文件"
-        find "$RUST_VENDOR_DIR" -name "*.orig" -delete
-        echo "[OK] 已删除多余的 .orig 文件 ✅"
+    if [ -f "$RUST_MAKEFILE" ]; then
+        echo "[INFO] 执行 Rust vendor 修复"
+        make package/rust/refresh V=s || true
+        echo "[OK] Rust vendor 修复完成 ✅"
     else
-        echo "[WARN] Rust vendor not found: $RUST_VENDOR_DIR"
+        echo "[WARN] Rust Makefile 未找到，跳过 vendor 修复"
     fi
 }
 
@@ -49,7 +62,6 @@ fix_rust_vendor() {
 # ==============================
 fix_config_generate() {
     if [ -f "$CONFIG_GENERATE" ]; then
-        echo "[INFO] Found config_generate: $CONFIG_GENERATE"
         echo "[INFO] 修改默认 LAN 网络参数"
 
         sed -i 's/192\.168\.1\.1/10.10.10.10/g' "$CONFIG_GENERATE"
@@ -58,10 +70,10 @@ fix_config_generate() {
         sed -i '/ipaddr=10.10.10.10/a\        uci set network.lan.dns=10.10.10.10' "$CONFIG_GENERATE"
 
         echo "-------- 检查修改结果 --------"
-        grep -E "10\.10\.10\.10|10\.10\.10\.1" "$CONFIG_GENERATE" || echo "[FAIL] 未找到修改结果 ❌"
+        grep -E "10\.10\.10\.10|10\.10\.10\.1" "$CONFIG_GENERATE" || echo "[FAIL] 修改失败 ❌"
         echo "-----------------------------"
     else
-        echo "[WARN] config_generate not found: $CONFIG_GENERATE"
+        echo "[WARN] config_generate 未找到: $CONFIG_GENERATE"
     fi
 }
 
@@ -87,9 +99,10 @@ set_default_language_zh_cn() {
 }
 
 # ==============================
-# 执行
+# 执行所有修复
 # ==============================
 fix_rust_compile_error
+fix_rust_patch
 fix_rust_vendor
 fix_config_generate
 set_default_language_zh_cn
