@@ -60,21 +60,23 @@ set_default_language_zh_cn() {
 }
 
 # ==============================
-# 修改 scripts/gen_image_generic.sh (补 EF02 分区)
+# 修改 scripts/gen_image_generic.sh (补 EF02 分区 4MB)
 # ==============================
 fix_gen_image_generic() {
     if [ -f "$GEN_IMAGE_GENERIC" ]; then
-        echo "[INFO] Patching gen_image_generic.sh for EF02 support"
+        echo "[INFO] Patching gen_image_generic.sh for EF02 support (4MB)"
 
-        if ! grep -q "EFIPARTTYPE" "$GEN_IMAGE_GENERIC"; then
+        if ! grep -q "EF02 BIOS Boot partition" "$GEN_IMAGE_GENERIC"; then
             cat >> "$GEN_IMAGE_GENERIC" <<'EOF'
 
 # ==============================
-# Custom: add EF02 partition when using GUID (GPT)
+# Custom: add EF02 BIOS Boot + EFI partition when using GUID (GPT)
 # ==============================
 if [ -n "$GUID" ]; then
-    EFISIZE=2     # MB
+    EFISIZE=4     # MB (保险值，避免 GRUB core.img 空间不足)
     EFIPARTTYPE=ef02
+
+    echo "[Custom] Adding EF02 BIOS Boot partition ($EFISIZE MB)"
 
     set $(ptgen -o "$OUTPUT" -h $head -s $sect -g \
         -t "${KERNELPARTTYPE}" -p "${KERNELSIZE}m${PARTOFFSET:+@$PARTOFFSET}" \
