@@ -76,12 +76,42 @@ set_default_language_zh_cn() {
 }
 
 # ==============================
-# 执行
+# 修复 open-vm-tools 编译错误（禁用 -Werror）
+# ==============================
+fix_open_vm_tools_build() {
+    OPEN_VM_TOOLS_MK="feeds/packages/utils/open-vm-tools/Makefile"
+
+    if [ -f "$OPEN_VM_TOOLS_MK" ]; then
+        echo "[INFO] Found open-vm-tools Makefile: $OPEN_VM_TOOLS_MK"
+        echo "[INFO] 注入自定义 Build/Compile 段，禁用 -Werror"
+
+        if ! grep -q "Wno-error" "$OPEN_VM_TOOLS_MK"; then
+            cat >> "$OPEN_VM_TOOLS_MK" <<'EOF'
+
+# =============================
+# Custom fix injected by custom.sh
+# GCC14 fix: disable -Werror to allow build to pass
+# =============================
+define Build/Compile
+	$(MAKE) -C $(PKG_BUILD_DIR) \
+		CFLAGS="$(TARGET_CFLAGS) -Wno-error -Wno-error=format-security" \
+		CXXFLAGS="$(TARGET_CFLAGS) -Wno-error -Wno-error=format-security" \
+		LDFLAGS="$(TARGET_LDFLAGS)" all
+endef
+EOF
+            echo "[OK] 已成功写入 open-vm-tools 补丁 ✅"
+        else
+            echo "[SKIP] open-vm-tools Makefile 已存在补丁，跳过注入。"
+        fi
+    else
+        echo "[WARN] open-vm-tools Makefile 未找到，可能 feeds 尚未更新。"
+    fi
+}
+
+# ==============================
+# 执行顺序
 # ==============================
 fix_rust_compile_error
 fix_config_generate
 set_default_language_zh_cn
-
-echo "=============================="
-echo "custom.sh done."
-echo "=============================="
+fix_open_vm_tools_build
