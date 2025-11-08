@@ -8,7 +8,6 @@ echo "=============================="
 RUST_MAKEFILE="feeds/packages/lang/rust/Makefile"
 CONFIG_GENERATE="package/base-files/files/bin/config_generate"
 OPEN_VM_TOOLS_MK="feeds/packages/utils/open-vm-tools/Makefile"
-LWS_MAKEFILE="feeds/packages/libs/libwebsockets/Makefile"
 
 # ==============================
 # 修复 Rust 编译错误
@@ -66,21 +65,40 @@ EOF
 }
 
 # ==============================
-# ✅ 你确认成功的方案：为 libwebsockets 增加 CMake policy 降级行为
+# 修复 libwebsockets CMake 版本要求
 # ==============================
 fix_libwebsockets_cmake() {
-    if [ -f "$LWS_MAKEFILE" ]; then
-        echo "[INFO] 修复 libwebsockets CMake Policy 版本要求"
-        if ! grep -q "CMAKE_POLICY_VERSION_MINIMUM" "$LWS_MAKEFILE"; then
-            echo '' >> "$LWS_MAKEFILE"
-            echo '# Fix CMake version policy' >> "$LWS_MAKEFILE"
-            echo 'CMAKE_OPTIONS += -DCMAKE_POLICY_VERSION_MINIMUM=3.5' >> "$LWS_MAKEFILE"
-            echo "[OK] 已注入 -DCMAKE_POLICY_VERSION_MINIMUM ✅"
-        else
-            echo "[SKIP] 已存在该设置，跳过。"
-        fi
+    LWS_SRC_DIR="feeds/packages/libs/libwebsockets"
+
+    if [ -d "$LWS_SRC_DIR" ]; then
+        echo "[INFO] 修复 libwebsockets CMakeLists.txt cmake_minimum_required 版本"
+        # 补丁生效前确保该目录已更新
+        ./scripts/feeds update packages >/dev/null 2>&1
+        ./scripts/feeds install libwebsockets >/dev/null 2>&1
+
+        LWS_CMAKE_FILE="$LWS_SRC_DIR/files/libwebsockets-4.3.3/CMakeLists.txt"
+
+        # 如果源码还没解压，就提前创建 patch 钩子
+        mkdir -p "$LWS_SRC_DIR/patches"
+        echo "[INFO] 写入自动修复补丁: $LWS_SRC_DIR/patches/001-fix-cmake-version.patch"
+        cat > "$LWS_SRC_DIR/patches/001-fix-cmake-version.patch" << 'EOF'
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -22,7 +22,7 @@
+ 
+ # Minimum cmake required
+ # ----------------------
+-cmake_minimum_required(VERSION 2.8.12)
++cmake_minimum_required(VERSION 3.5)
+
+EOF
+
+        echo "[OK] libwebsockets CMakeLists 修复补丁已写入 ✅"
+    else
+        echo "[WARN] libwebsockets 目录不存在 (feeds 未更新?) ❗"
     fi
 }
+
 
 # ==============================
 # 执行顺序
