@@ -109,33 +109,24 @@ EOF
 }
 
 # ==============================
-# 修复 libwebsockets CMake 兼容错误
+# 修复 libwebsockets CMake Policy 错误（推荐方案：修改 Makefile 而非补丁源码）
 # ==============================
 fix_libwebsockets_cmake() {
-    LWS_PATCH_DIR="feeds/packages/libs/libwebsockets/patches"
-    PATCH_FILE="$LWS_PATCH_DIR/001-fix-cmake-policy.patch"
+    LWS_MAKEFILE="feeds/packages/libs/libwebsockets/Makefile"
 
-    echo "[INFO] Fixing libwebsockets CMake Policy issue"
+    if [ -f "$LWS_MAKEFILE" ]; then
+        echo "[INFO] 修复 libwebsockets 编译参数加入 CMAKE_POLICY_VERSION_MINIMUM"
 
-    # 确保目录存在
-    mkdir -p "$LWS_PATCH_DIR"
-
-    # 写入补丁
-    cat > "$PATCH_FILE" << 'EOF'
---- a/CMakeLists.txt
-+++ b/CMakeLists.txt
-@@ -22,6 +22,10 @@
- cmake_minimum_required(VERSION 3.5)
-
-+if(POLICY CMP0000)
-+  cmake_policy(SET CMP0000 OLD)
-+endif()
-+set(CMAKE_POLICY_VERSION_MINIMUM 3.5)
-
- project(lws C)
-EOF
-
-    echo "[OK] libwebsockets 补丁文件已写入: $PATCH_FILE ✅"
+        # 检查是否已添加过
+        if ! grep -q "CMAKE_POLICY_VERSION_MINIMUM" "$LWS_MAKEFILE"; then
+            sed -i '/CMAKE_OPTIONS +=/a\  CMAKE_OPTIONS += -DCMAKE_POLICY_VERSION_MINIMUM=3.5' "$LWS_MAKEFILE"
+            echo "[OK] 已注入 CMAKE_POLICY_VERSION_MINIMUM ✅"
+        else
+            echo "[SKIP] 已存在该设置，跳过。"
+        fi
+    else
+        echo "[WARN] 未找到 libwebsockets Makefile（feeds 未更新？）"
+    fi
 }
 
 # ==============================
