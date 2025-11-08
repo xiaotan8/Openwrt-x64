@@ -8,10 +8,11 @@ echo "=============================="
 RUST_MAKEFILE="feeds/packages/lang/rust/Makefile"
 CONFIG_GENERATE="package/base-files/files/bin/config_generate"
 OPEN_VM_TOOLS_MK="feeds/packages/utils/open-vm-tools/Makefile"
-LWS_PATCH_DIR="feeds/packages/libs/libwebsockets/patches"
-LWS_PATCH_FILE="$LWS_PATCH_DIR/100-no-werror.patch"
+LWS_MAKEFILE="feeds/packages/libs/libwebsockets/Makefile"
 
+# ==============================
 # 修复 Rust 编译错误
+# ==============================
 fix_rust_compile_error() {
     if [ -f "$RUST_MAKEFILE" ]; then
         sed -i 's/download-ci-llvm=true/download-ci-llvm=false/g' "$RUST_MAKEFILE"
@@ -19,7 +20,9 @@ fix_rust_compile_error() {
     fi
 }
 
-# 修改默认网络
+# ==============================
+# 修改默认 LAN 网络
+# ==============================
 fix_config_generate() {
     if [ -f "$CONFIG_GENERATE" ]; then
         sed -i 's/192\.168\.1\.1/10.10.10.10/g' "$CONFIG_GENERATE"
@@ -29,7 +32,9 @@ fix_config_generate() {
     fi
 }
 
-# 默认语言改中文
+# ==============================
+# 默认语言设置为中文
+# ==============================
 set_default_language_zh_cn() {
     ./scripts/feeds update luci >/dev/null 2>&1
     ./scripts/feeds install -a >/dev/null 2>&1
@@ -42,7 +47,9 @@ set_default_language_zh_cn() {
     echo "[OK] 默认语言设置为中文 ✅"
 }
 
-# 修复 open-vm-tools 编译
+# ==============================
+# open-vm-tools 禁用 -Werror
+# ==============================
 fix_open_vm_tools_build() {
     if [ -f "$OPEN_VM_TOOLS_MK" ] && ! grep -q "Wno-error" "$OPEN_VM_TOOLS_MK"; then
         cat >> "$OPEN_VM_TOOLS_MK" <<'EOF'
@@ -58,32 +65,31 @@ EOF
     fi
 }
 
-# ✅ 新增：修复 libwebsockets 编译 - 禁用 -Werror
-fix_libwebsockets_no_werror() {
-    mkdir -p "$LWS_PATCH_DIR"
-    cat > "$LWS_PATCH_FILE" <<'EOF'
---- a/CMakeLists.txt
-+++ b/CMakeLists.txt
-@@ -155,7 +155,7 @@ if (LWS_WITH_WARNINGS)
-        if (CMAKE_COMPILER_IS_GNUCC OR ("${CMAKE_C_COMPILER_ID}" MATCHES "Clang"))
-                add_compile_options(
-                        -Wall
--                       -Werror
-+                       # -Werror disabled for OpenWrt GCC >= 13/14
-                        -Wuninitialized
-                )
-        endif()
-EOF
-
-    echo "[OK] 已注入 libwebsockets 补丁：$LWS_PATCH_FILE ✅"
+# ==============================
+# ✅ 你确认成功的方案：为 libwebsockets 增加 CMake policy 降级行为
+# ==============================
+fix_libwebsockets_cmake() {
+    if [ -f "$LWS_MAKEFILE" ]; then
+        echo "[INFO] 修复 libwebsockets CMake Policy 版本要求"
+        if ! grep -q "CMAKE_POLICY_VERSION_MINIMUM" "$LWS_MAKEFILE"; then
+            echo '' >> "$LWS_MAKEFILE"
+            echo '# Fix CMake version policy' >> "$LWS_MAKEFILE"
+            echo 'CMAKE_OPTIONS += -DCMAKE_POLICY_VERSION_MINIMUM=3.5' >> "$LWS_MAKEFILE"
+            echo "[OK] 已注入 -DCMAKE_POLICY_VERSION_MINIMUM ✅"
+        else
+            echo "[SKIP] 已存在该设置，跳过。"
+        fi
+    fi
 }
 
+# ==============================
 # 执行顺序
+# ==============================
 fix_rust_compile_error
 fix_config_generate
 set_default_language_zh_cn
 fix_open_vm_tools_build
-fix_libwebsockets_no_werror
+fix_libwebsockets_cmake
 
 echo "=============================="
 echo "custom.sh 执行完毕 ✅"
