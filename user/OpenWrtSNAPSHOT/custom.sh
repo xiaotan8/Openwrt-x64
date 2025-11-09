@@ -76,64 +76,12 @@ set_default_language_zh_cn() {
 }
 
 # ==============================
-# 修复 open-vm-tools 编译错误（禁用 -Werror）
-# ==============================
-fix_open_vm_tools_build() {
-    OPEN_VM_TOOLS_MK="feeds/packages/utils/open-vm-tools/Makefile"
-
-    if [ -f "$OPEN_VM_TOOLS_MK" ]; then
-        echo "[INFO] Found open-vm-tools Makefile: $OPEN_VM_TOOLS_MK"
-        echo "[INFO] 注入自定义 Build/Compile 段，禁用 -Werror"
-
-        if ! grep -q "Wno-error" "$OPEN_VM_TOOLS_MK"; then
-            cat >> "$OPEN_VM_TOOLS_MK" <<'EOF'
-
-# =============================
-# Custom fix injected by custom.sh
-# GCC14 fix: disable -Werror to allow build to pass
-# =============================
-define Build/Compile
-	$(MAKE) -C $(PKG_BUILD_DIR) \
-		CFLAGS="$(TARGET_CFLAGS) -Wno-error -Wno-error=format-security" \
-		CXXFLAGS="$(TARGET_CFLAGS) -Wno-error -Wno-error=format-security" \
-		LDFLAGS="$(TARGET_LDFLAGS)" all
-endef
-EOF
-            echo "[OK] 已成功写入 open-vm-tools 补丁 ✅"
-        else
-            echo "[SKIP] open-vm-tools Makefile 已存在补丁，跳过注入。"
-        fi
-    else
-        echo "[WARN] open-vm-tools Makefile 未找到，可能 feeds 尚未更新。"
-    fi
-}
-
-# ==============================
-# 修复 libwebsockets CMake Policy 错误（推荐方案：修改 Makefile 而非补丁源码）
-# ==============================
-fix_libwebsockets_cmake() {
-    LWS_MAKEFILE="feeds/packages/libs/libwebsockets/Makefile"
-
-    if [ -f "$LWS_MAKEFILE" ]; then
-        echo "[INFO] 修复 libwebsockets 编译参数加入 CMAKE_POLICY_VERSION_MINIMUM"
-
-        # 检查是否已添加过
-        if ! grep -q "CMAKE_POLICY_VERSION_MINIMUM" "$LWS_MAKEFILE"; then
-            sed -i '/CMAKE_OPTIONS +=/a\  CMAKE_OPTIONS += -DCMAKE_POLICY_VERSION_MINIMUM=3.10' "$LWS_MAKEFILE"
-            echo "[OK] 已注入 CMAKE_POLICY_VERSION_MINIMUM ✅"
-        else
-            echo "[SKIP] 已存在该设置，跳过。"
-        fi
-    else
-        echo "[WARN] 未找到 libwebsockets Makefile（feeds 未更新？）"
-    fi
-}
-
-# ==============================
-# 执行顺序
+# 执行
 # ==============================
 fix_rust_compile_error
 fix_config_generate
 set_default_language_zh_cn
-fix_open_vm_tools_build
-fix_libwebsockets_cmake
+
+echo "=============================="
+echo "custom.sh done."
+echo "=============================="
