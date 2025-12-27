@@ -103,8 +103,8 @@ fix_ssr_build
 # ==============================
 # 5. 更新 feeds
 # ==============================
-./scripts/feeds update -a
-./scripts/feeds install -a
+# ./scripts/feeds update -a
+# ./scripts/feeds install -a
 
 echo "=============================="
 echo ">>> custom.sh done ✅"
