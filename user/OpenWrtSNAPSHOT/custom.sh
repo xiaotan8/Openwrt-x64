@@ -75,6 +75,37 @@ set_default_language_zh_cn() {
     fi
 }
 
+
+echo "=============================="
+echo ">>> Running OpenWrtSNAPSHOT/custom.sh ..."
+echo "=============================="
+
+apply_pr_21288_remote() {
+    echo "[Step] Apply PR 21288 patch from GitHub (virtual provides / ca-certs) ..."
+
+    PR_URL="https://github.com/openwrt/openwrt/pull/21288.patch"
+    TMP_PATCH="/tmp/openwrt-pr-21288.patch"
+
+    # 下载 patch
+    if ! curl -fsSL "$PR_URL" -o "$TMP_PATCH"; then
+        echo "  -> 下载 PR 21288 失败，跳过应用该补丁"
+        return 0
+    fi
+
+    # 预检查
+    if patch -p1 --forward --dry-run < "$TMP_PATCH" >/dev/null 2>&1; then
+        echo "  -> 预检查通过，开始应用补丁 (patch -p1)"
+        patch -p1 --forward < "$TMP_PATCH"
+        echo "  -> 已应用 PR 21288 补丁 ✅"
+    else
+        echo "  -> 补丁似乎已经应用或不适用当前源码，跳过"
+    fi
+
+    rm -f "$TMP_PATCH"
+}
+
+apply_pr_21288_remote
+
 # ==============================
 # 执行
 # ==============================
