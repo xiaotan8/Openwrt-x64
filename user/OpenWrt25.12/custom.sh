@@ -13,36 +13,6 @@ RUST_MAKEFILE="feeds/packages/lang/rust/Makefile"
 CONFIG_GENERATE="package/base-files/files/bin/config_generate"
 
 # ==============================
-# 恢复 include/package-pack.mk 到提交前版本 (e0ea3d7)
-# ==============================
-restore_package_pack_mk() {
-    echo "[INFO] Restoring include/package-pack.mk to pre-e0ea3d7 version"
-    
-    PACKAGE_PACK_MK="include/package-pack.mk"
-    PARENT_COMMIT="2da39423ed90372cf9679ea11a5e9c3240bc2e47"
-    
-    if [ -f "$PACKAGE_PACK_MK" ]; then
-        # 从parent commit获取文件
-        if curl -s -f -o "$PACKAGE_PACK_MK" \
-            "https://raw.githubusercontent.com/openwrt/openwrt/$PARENT_COMMIT/$PACKAGE_PACK_MK"; then
-            echo "[OK] Successfully restored $PACKAGE_PACK_MK from parent commit ✅"
-        else
-            echo "[WARN] Failed to download $PACKAGE_PACK_MK from parent commit"
-            echo "[INFO] Trying alternative method..."
-            
-            # 备选方案：使用git恢复
-            if git log --oneline | grep -q "e0ea3d7"; then
-                echo "[INFO] Found the problematic commit in history"
-                git show $PARENT_COMMIT:$PACKAGE_PACK_MK > "$PACKAGE_PACK_MK" 2>/dev/null && \
-                    echo "[OK] Restored using git show" || echo "[WARN] Git show failed"
-            fi
-        fi
-    else
-        echo "[WARN] $PACKAGE_PACK_MK not found, skipping restore"
-    fi
-}
-
-# ==============================
 # 修复 Rust 编译错误（禁用下载 ci-llvm）
 # ==============================
 fix_rust_compile_error() {
@@ -108,7 +78,6 @@ set_default_language_zh_cn() {
 # ==============================
 # 执行
 # ==============================
-restore_package_pack_mk
 fix_rust_compile_error
 fix_config_generate
 set_default_language_zh_cn
