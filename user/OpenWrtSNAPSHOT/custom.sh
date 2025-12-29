@@ -12,60 +12,34 @@ echo "=============================="
 RUST_MAKEFILE="feeds/packages/lang/rust/Makefile"
 CONFIG_GENERATE="package/base-files/files/bin/config_generate"
 
+
 # ==============================
-# 应用 PR #21288 补丁 - 修复 ca-bundle 和 ca-certificates 冲突
+# 恢复 include/package-pack.mk 到提交前版本
 # ==============================
-apply_pr21288_patch() {
-    echo "[INFO] Applying PR #21288 patch to fix ca-bundle/ca-certificates conflict"
+restore_package_pack_mk() {
+    echo "[INFO] Restoring include/package-pack.mk to pre-18029977 version"
     
-    # 配置git用户信息（用于cherry-pick）
-    git config user.email "ci@openwrt.local" 2>/dev/null || true
-    git config user.name "OpenWrt CI" 2>/dev/null || true
+    PACKAGE_PACK_MK="include/package-pack.mk"
+    PARENT_COMMIT="095151b2354752be6b4be81e6b22b65227c59746"
     
-    # 添加upstream远程
-    git remote add upstream https://github.com/openwrt/openwrt.git 2>/dev/null || true
-    
-    # 获取PR #21288的分支
-    if git fetch upstream pull/21288/head:pr-21288 2>/dev/null; then
-        echo "[INFO] Found PR #21288 branch, applying commits..."
-        
-        # 清理任何未提交的更改（stash）
-        if [ -n "$(git status --porcelain)" ]; then
-            echo "[WARN] Stashing local changes before cherry-pick"
-            git stash push -m "temp-stash-before-pr21288" || true
-        fi
-        
-        # 应用7个关键commit，使用安全的cherry-pick方式
-        for commit in da44bd045f2e2e04d9f540f4824118b25295cd20 21be7558eb33209390a2c98f7a74b61b3a450cab bfafeb93a4faefb76d31c97887e6efe609b45065 0b17000c230f569b28597a69c3dd46d4f8caaef3 b0943f91ab48c67bc2530078ed558daf991d9849 a8917e9de91b037c978c679471359ff57eff5ca1 a221d075890d127ddbf49d11f67227bdaca7349b; do
-            short_hash=$(echo $commit | cut -c1-7)
-            
-            # 检查commit是否已存在（通过grep搜索log）
-            if git log --oneline | grep -q "$short_hash"; then
-                echo "[INFO] Commit $short_hash already applied, skipping"
-                continue
-            fi
-            
-            # 尝试cherry-pick
-            if git cherry-pick "$commit" 2>/dev/null; then
-                echo "[OK] Applied commit $short_hash"
-            else
-                # 如果失败，尝试中止并继续
-                git cherry-pick --abort 2>/dev/null || true
-                echo "[WARN] Commit $short_hash already applied or has conflicts, skipping"
-            fi
-        done
-        
-        echo "[OK] PR #21288 commits applied ✅"
-    else
-        echo "[WARN] Failed to fetch PR #21288, trying alternative method..."
-        
-        # 备选方案：直接应用补丁文件
-        if curl -s https://github.com/openwrt/openwrt/pull/21288.patch | patch -p0 --dry-run >/dev/null 2>&1; then
-            echo "[INFO] Applying patch file directly"
-            curl -s https://github.com/openwrt/openwrt/pull/21288.patch | patch -p0 --forward || echo "[WARN] Patch application skipped"
+    if [ -f "$PACKAGE_PACK_MK" ]; then
+        # 从parent commit获取文件
+        if curl -s -f -o "$PACKAGE_PACK_MK" \
+            "https://raw.githubusercontent.com/openwrt/openwrt/$PARENT_COMMIT/$PACKAGE_PACK_MK"; then
+            echo "[OK] Successfully restored $PACKAGE_PACK_MK from parent commit ✅"
         else
-            echo "[INFO] Patch already applied or not applicable to this version"
+            echo "[WARN] Failed to download $PACKAGE_PACK_MK from parent commit"
+            echo "[INFO] Trying alternative method..."
+            
+            # 备选方案：使用git cherry-pick恢复
+            if git log --oneline | grep -q "18029977"; then
+                echo "[INFO] Found the problematic commit in history"
+                git show $PARENT_COMMIT:$PACKAGE_PACK_MK > "$PACKAGE_PACK_MK" 2>/dev/null && \
+                    echo "[OK] Restored using git show" || echo "[WARN] Git show failed"
+            fi
         fi
+    else
+        echo "[WARN] $PACKAGE_PACK_MK not found, skipping restore"
     fi
 }
 
@@ -135,7 +109,7 @@ set_default_language_zh_cn() {
 # ==============================
 # 执行
 # ==============================
-apply_pr21288_patch
+restore_package_pack_mk
 fix_rust_compile_error
 fix_config_generate
 set_default_language_zh_cn
