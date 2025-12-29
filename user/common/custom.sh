@@ -36,7 +36,7 @@ git clone --depth=1 https://github.com/xiaorouji/openwrt-passwall package/passwa
 
 
 # 常用插件
-git clone --depth=1 https://github.com/xiaotan8/luci-app-wechatpush.git package/applications/luci-app-wechatpush
+git clone --depth=1 https://github.com/tty228/luci-app-wechatpush.git package/applications/luci-app-wechatpush
 git clone --depth=1 https://github.com/KFERMercer/luci-app-tcpdump.git package/applications/luci-app-tcpdump
 git clone --depth=1 https://github.com/nikkinikki-org/OpenWrt-nikki.git package/applications/luci-app-nikki
 git clone --depth=1 https://github.com/nikkinikki-org/OpenWrt-momo.git  package/applications/luci-app-momo
