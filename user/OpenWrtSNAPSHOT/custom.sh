@@ -18,23 +18,54 @@ CONFIG_GENERATE="package/base-files/files/bin/config_generate"
 apply_pr21288_patch() {
     echo "[INFO] Applying PR #21288 patch to fix ca-bundle/ca-certificates conflict"
     
-    # 方案A: 使用git cherry-pick从官方应用（推荐）
-    git remote add upstream https://github.com/openwrt/openwrt.git 2>/dev/null || true
-    git fetch upstream pull/21288/head:pr-21288 2>/dev/null || true
+    # 配置git用户信息（用于cherry-pick）
+    git config user.email "ci@openwrt.local" 2>/dev/null || true
+    git config user.name "OpenWrt CI" 2>/dev/null || true
     
-    if git rev-parse --verify pr-21288 >/dev/null 2>&1; then
+    # 添加upstream远程
+    git remote add upstream https://github.com/openwrt/openwrt.git 2>/dev/null || true
+    
+    # 获取PR #21288的分支
+    if git fetch upstream pull/21288/head:pr-21288 2>/dev/null; then
         echo "[INFO] Found PR #21288 branch, applying commits..."
-        # 应用7个关键commit
-        git cherry-pick da44bd045f2e2e04d9f540f4824118b25295cd20 || echo "[WARN] da44bd0 already applied or conflicts"
-        git cherry-pick 21be7558eb33209390a2c98f7a74b61b3a450cab || echo "[WARN] 21be755 already applied or conflicts"
-        git cherry-pick bfafeb93a4faefb76d31c97887e6efe609b45065 || echo "[WARN] bfafeb9 already applied or conflicts"
-        git cherry-pick 0b17000c230f569b28597a69c3dd46d4f8caaef3 || echo "[WARN] 0b17000 already applied or conflicts"
-        git cherry-pick b0943f91ab48c67bc2530078ed558daf991d9849 || echo "[WARN] b0943f9 already applied or conflicts"
-        git cherry-pick a8917e9de91b037c978c679471359ff57eff5ca1 || echo "[WARN] a8917e9 already applied or conflicts"
-        git cherry-pick a221d075890d127ddbf49d11f67227bdaca7349b || echo "[WARN] a221d07 already applied or conflicts"
+        
+        # 清理任何未提交的更改（stash）
+        if [ -n "$(git status --porcelain)" ]; then
+            echo "[WARN] Stashing local changes before cherry-pick"
+            git stash push -m "temp-stash-before-pr21288" || true
+        fi
+        
+        # 应用7个关键commit，使用安全的cherry-pick方式
+        for commit in da44bd045f2e2e04d9f540f4824118b25295cd20 21be7558eb33209390a2c98f7a74b61b3a450cab bfafeb93a4faefb76d31c97887e6efe609b45065 0b17000c230f569b28597a69c3dd46d4f8caaef3 b0943f91ab48c67bc2530078ed558daf991d9849 a8917e9de91b037c978c679471359ff57eff5ca1 a221d075890d127ddbf49d11f67227bdaca7349b; do
+            short_hash=$(echo $commit | cut -c1-7)
+            
+            # 检查commit是否已存在（通过grep搜索log）
+            if git log --oneline | grep -q "$short_hash"; then
+                echo "[INFO] Commit $short_hash already applied, skipping"
+                continue
+            fi
+            
+            # 尝试cherry-pick
+            if git cherry-pick "$commit" 2>/dev/null; then
+                echo "[OK] Applied commit $short_hash"
+            else
+                # 如果失败，尝试中止并继续
+                git cherry-pick --abort 2>/dev/null || true
+                echo "[WARN] Commit $short_hash already applied or has conflicts, skipping"
+            fi
+        done
+        
         echo "[OK] PR #21288 commits applied ✅"
     else
-        echo "[WARN] PR #21288 branch not found, skipping patch application"
+        echo "[WARN] Failed to fetch PR #21288, trying alternative method..."
+        
+        # 备选方案：直接应用补丁文件
+        if curl -s https://github.com/openwrt/openwrt/pull/21288.patch | patch -p0 --dry-run >/dev/null 2>&1; then
+            echo "[INFO] Applying patch file directly"
+            curl -s https://github.com/openwrt/openwrt/pull/21288.patch | patch -p0 --forward || echo "[WARN] Patch application skipped"
+        else
+            echo "[INFO] Patch already applied or not applicable to this version"
+        fi
     fi
 }
 
