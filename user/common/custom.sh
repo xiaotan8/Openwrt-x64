@@ -30,8 +30,8 @@ echo "[Step] 克隆插件 ..."
 git clone --depth=1 https://github.com/vernesong/OpenClash.git -b master package/openclash
 
 # Passwall
-git clone --depth=1 https://github.com/xiaorouji/openwrt-passwall-packages package/passwall-packages
-git clone --depth=1 https://github.com/xiaorouji/openwrt-passwall package/passwall-luci
+git clone --depth=1 https://github.com/Openwrt-Passwall/openwrt-passwall-packages package/passwall-packages
+git clone --depth=1 https://github.com/Openwrt-Passwall/openwrt-passwall package/passwall-luci
 
 
 
