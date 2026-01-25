@@ -7,8 +7,6 @@ echo "=============================="
 
 # 1. 删除冲突或旧包
 # ==============================
-rm -rf feeds/packages/lang/golang
-git clone https://github.com/sbwml/packages_lang_golang -b 26.x feeds/packages/lang/golang
 rm -rf feeds/luci/themes/luci-theme-argon
 rm -rf package/luci-theme-argon
 rm -rf package/applications/luci-app-argon-config
