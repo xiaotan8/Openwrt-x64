@@ -11,6 +11,8 @@ rm -rf feeds/luci/themes/luci-theme-argon
 rm -rf package/luci-theme-argon
 rm -rf package/applications/luci-app-argon-config
 rm -rf feeds/packages/net/{xray-core,v2ray-geodata,sing-box,chinadns-ng,dns2socks,hysteria,ipt2socks,microsocks,naiveproxy,shadowsocks-rust,shadowsocksr-libev,simple-obfs,tcping,v2ray-plugin,xray-plugin,geoview,shadow-tls}
+rm -rf feeds/packages/lang/golang
+git clone https://github.com/sbwml/packages_lang_golang -b 26.x feeds/packages/lang/golang
 # ==============================
 # 2. 拉取主题 & 配置插件
 # ==============================
